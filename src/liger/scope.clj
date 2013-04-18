@@ -9,8 +9,3 @@
   (-> (primitives)
       (m/reduce-state (map (comp eval/eval t/clj->ltype) prelude))
       second))
-
-(defn pr-scope [scope]
-  (clojure.string/join ", "
-                       (for [[key value] scope]
-                         (str key ": " (t/pr-value value)))))

@@ -130,3 +130,10 @@
                (<= n 1) n
                true (+ (fib (- n 1)) (fib (- n 2)))))
   (= 55 (fib 10)))
+
+(test dumb-pattern-matching
+  (ƒ fib
+    0 -> 0
+    1 -> 1
+    n -> (+ (fib (- n 1)) (fib (- n 2))))
+  (= 55 (fib 10)))

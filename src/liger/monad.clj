@@ -18,3 +18,6 @@
               [(conj values value) state]))
           [[] scope]
           mvs))
+
+(defn state-id [scope]
+  [nil scope])

@@ -24,12 +24,3 @@
 (defmacro eval-form [& forms]
   `(let [value# (eval-forms (list ~@(for [form forms] `(quote ~form))))]
      (t/pr-value value#)))
-
-(comment
-  (eval-form
-   (define fib
-     (λ n -> (cond
-              (= n 0) 0
-              (= n 1) 1
-              true (+ (recur (- n 1)) (recur (- n 2))))))
-   (fib 10)))
