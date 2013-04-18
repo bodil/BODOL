@@ -1,4 +1,5 @@
 (ns dolan.test
+  (:refer-clojure :exclude [test])
   (:require [clojure.test :refer [deftest is]]
             [dolan.repl :as repl])
   (:import [dolan.types LBoolean]))
@@ -40,7 +41,7 @@
   (not (= true "non-empty string"))
   (not (= false ())))
 
-(tests cond
+(tests cond-special-form
   (cond (= "foo" "bar") false
         true true
         true false))
