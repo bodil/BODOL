@@ -72,6 +72,9 @@
 (defprim l-eq [v1 v2]
   (LBoolean. (= v1 v2)))
 
+(defprim l-list values
+  (apply cons-list values))
+
 
 (defn primitives []
   {"quote" l-quote
@@ -82,6 +85,7 @@
    "cdr" l-cdr
    "atom?" l-atom?
    "=" l-eq
+   "list" l-list
    "lambda" lambda
    "fn" lambda
    "λ" lambda})
