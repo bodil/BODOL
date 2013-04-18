@@ -7,17 +7,37 @@
             [dolan.lambda :refer [lambda]])
   (:import [dolan.types LCons LBoolean]))
 
-(defn quote [[value]]
+(defn l-quote [[value]]
   (fn [scope]
     [value scope]))
 
-(defn define [[name value]]
+(defn l-define [[name value]]
   (fn [scope]
     (let [[value scope] ((eval/eval value) scope)]
       (if (t/lsymbol? name)
         [value (assoc scope (:value name) value)]
         (throw (ex-info "define called with non-symbol"
                         {:args [name value] :scope scope}))))))
+
+;; TODO: get rid of cond, use pattern matching
+(defn l-cond [clauses]
+  (if-not (zero? (rem (count clauses) 2))
+    (throw (ex-info (str "cond takes even number of clause pairs, "
+                         (count clauses) " given")
+                    {:args clauses}))
+
+    (let [clauses (partition 2 clauses)]
+      (fn [scope]
+        (loop [clauses clauses scope scope]
+          (if-not (seq clauses)
+            [nil scope]
+
+            (let [[test then] (first clauses)
+                  [result scope] ((eval/eval test) scope)]
+              (if-not (or (nil? result) (= (LBoolean. false) result))
+                ((eval/eval then) scope)
+                (recur (rest clauses) scope)))))))))
+
 
 
 (defmacro defprim [name bindings & body]
@@ -31,36 +51,37 @@
                              (assoc (ex-data e#)
                                {:args args# :scope scope#})))))))))
 
-(defprim cons [item list]
+(defprim l-cons [item list]
   (if (t/cons-list? list)
     (LCons. item list)
     (throw (ex-info "cons called with non-list" {}))))
 
-(defprim car [list]
+(defprim l-car [list]
   (if (t/cons-list? list)
     (first list)
     (throw (ex-info "car called with non-list" {}))))
 
-(defprim cdr [list]
+(defprim l-cdr [list]
   (if (t/cons-list? list)
     (apply cons-list (rest list))
     (throw (ex-info "cdr called with non-list" {}))))
 
-(defprim atom? [value]
+(defprim l-atom? [value]
   (LBoolean. (not (t/cons-list? value))))
 
-(defprim eq [v1 v2]
+(defprim l-eq [v1 v2]
   (LBoolean. (= v1 v2)))
 
 
 (defn primitives []
-  {"quote" quote
-   "define" define
-   "cons" cons
-   "car" car
-   "cdr" cdr
-   "atom?" atom?
-   "=" eq
+  {"quote" l-quote
+   "define" l-define
+   "cond" l-cond
+   "cons" l-cons
+   "car" l-car
+   "cdr" l-cdr
+   "atom?" l-atom?
+   "=" l-eq
    "lambda" lambda
    "fn" lambda
    "λ" lambda})
