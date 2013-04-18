@@ -66,3 +66,13 @@
     (let [[clauses arity] (parse-def args)
           f (Lambda. clauses arity scope [])]
       [f scope])))
+
+(defn defun [[name & args]]
+  (fn [scope]
+    (let [[clauses arity] (parse-def args)
+          name (:value name)
+          fn-scope (assoc scope name (scope "recur")
+                          :name name)
+          f (Lambda. clauses arity fn-scope [])
+          def-scope (assoc scope name f)]
+      [f def-scope])))

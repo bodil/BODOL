@@ -1,5 +1,5 @@
 (ns liger.primitives
-  (:require [liger.lambda :refer [lambda]]
+  (:require [liger.lambda :refer [lambda defun]]
             [liger.primitives.core :as core]
             [liger.primitives.numbers :as numbers]))
 
@@ -8,4 +8,7 @@
          numbers/primitives
          {"λ" lambda
           "fn" lambda
-          "lambda" lambda}))
+          "lambda" lambda
+          "ƒ" defun
+          "defn" defun
+          "defun" defun}))

@@ -124,3 +124,9 @@
                        (<= n 1) n
                        true (+ (recur (- n 1)) (recur (- n 2))))))
   (= 55 (fib 10)))
+
+(test recursion-with-named-function
+  (ƒ fib n -> (cond
+               (<= n 1) n
+               true (+ (fib (- n 1)) (fib (- n 2)))))
+  (= 55 (fib 10)))
