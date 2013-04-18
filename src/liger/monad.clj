@@ -1,4 +1,4 @@
-(ns dolan.monad)
+(ns liger.monad)
 
 (defn reduce-state
   "Evaluate a list of state monad values in sequence, using the

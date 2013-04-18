@@ -1,11 +1,14 @@
-(ns dolan.eval.lambda
-  (:require [dolan.eval.core :as eval]
-            [dolan.lambda :refer [curry lambda?]])
-  (:import [dolan.types LCons]))
+(ns liger.eval.lambda
+  (:require [liger.eval.core :as eval]
+            [liger.lambda :refer [curry lambda?]]
+            [liger.types :as t])
+  (:import [liger.types LCons]))
 
-(defn- invoke-clause [{:keys [args body]} arg-vals scope]
-  (let [[value state] ((eval/eval body)
-                       (merge scope (zipmap (map :value args) arg-vals)))]
+(defn- invoke-clause [func {:keys [args body]} arg-vals scope]
+  (let [[value state]
+        ((eval/eval body)
+         (merge scope (zipmap (map :value args) arg-vals)
+                {:function func}))]
     value))
 
 (defn invoke [func args]
@@ -17,14 +20,14 @@
       (cond
        (> call-arity arity)
        (throw (ex-info (str "function of arity " arity " invoked with "
-                            call-arity " arguments " args)
+                            call-arity " arguments " (t/pr-value args))
                        {:args args :func func}))
 
        (< call-arity arity)
        [(curry func args) outer-scope]
 
        :else
-       [(invoke-clause (first clauses) args scope) outer-scope]))))
+       [(invoke-clause func (first clauses) args scope) outer-scope]))))
 
 (extend-type LCons
   eval/Eval

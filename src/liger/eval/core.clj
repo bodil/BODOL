@@ -1,6 +1,6 @@
-(ns dolan.eval.core
+(ns liger.eval.core
   (:refer-clojure :exclude [eval])
-  (:require [dolan.monad :as m]))
+  (:require [liger.monad :as m]))
 
 (defprotocol Eval
   (-eval [this]))

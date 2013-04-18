@@ -1,8 +1,8 @@
-(ns dolan.primitives.numbers
-  (:require [dolan.eval :as eval]
-            [dolan.types :as t]
-            [dolan.primitives.core :refer [defprim]])
-  (:import [dolan.types LNumber LBoolean]))
+(ns liger.primitives.numbers
+  (:require [liger.eval :as eval]
+            [liger.types :as t]
+            [liger.primitives.core :refer [defprim]])
+  (:import [liger.types LNumber LBoolean]))
 
 (defmacro defnumf [name args & body]
   `(defprim ~name ~args

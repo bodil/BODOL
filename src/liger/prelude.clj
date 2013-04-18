@@ -1,4 +1,4 @@
-(ns dolan.prelude)
+(ns liger.prelude)
 
 (def prelude
   '[(define not (lambda b -> (cond b false true true)))

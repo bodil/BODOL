@@ -1,9 +1,10 @@
-(ns dolan.primitives.core
+(ns liger.primitives.core
   (:refer-clojure :exclude [eval])
-  (:require [dolan.eval :as eval]
-            [dolan.types :refer [cons-list car cdr]]
-            [dolan.types :as t])
-  (:import [dolan.types LCons LBoolean]))
+  (:require [liger.eval :as eval]
+            [liger.eval.lambda :as lambda]
+            [liger.types :refer [cons-list car cdr]]
+            [liger.types :as t])
+  (:import [liger.types LCons LBoolean LNumber]))
 
 (defn l-quote [[value]]
   (fn [scope]
@@ -35,6 +36,13 @@
               (if-not (or (nil? result) (= (LBoolean. false) result))
                 ((eval/eval then) scope)
                 (recur (rest clauses) scope)))))))))
+
+(defn l-recur [args]
+  (fn [scope]
+    (if-let [func (:function scope)]
+      ((lambda/invoke func args) scope)
+      (throw (ex-info "recur called outside lambda"
+                      {:args args :scope scope})))))
 
 
 
@@ -78,6 +86,7 @@
 (def primitives
   {"quote" l-quote
    "define" l-define
+   "recur" l-recur
    "cond" l-cond
    "cons" l-cons
    "car" l-car

@@ -1,8 +1,8 @@
-(ns dolan.lambda
+(ns liger.lambda
   (:require [clojure.core.match :refer [match]]
             [clojure.string :as string]
-            [dolan.parser :refer [parse]]
-            [dolan.types :as t]))
+            [liger.parser :refer [parse]]
+            [liger.types :as t]))
 
 (def prog (first (parse "(a b -> (cons a b))")))
 

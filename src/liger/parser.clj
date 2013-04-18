@@ -1,8 +1,8 @@
-(ns dolan.parser
+(ns liger.parser
   (:require [instaparse.core :as insta]
             [clojure.edn :as edn]
-            [dolan.types :as t])
-  (:import [dolan.types LBoolean LNumber LString LSymbol LCons]))
+            [liger.types :as t])
+  (:import [liger.types LBoolean LNumber LString LSymbol LCons]))
 
 (def parser
   (insta/parser

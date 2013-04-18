@@ -1,9 +1,11 @@
-(ns dolan.types
+(ns liger.types
   (:require [clojure.string :as string]
             [clojure.walk :as walk]))
 
+(declare cons-list)
 (defn pr-value [value]
-  (.toString value))
+  (if (nil? value) "nil"
+      (.toString value)))
 
 (defrecord LBoolean [value]
   Object

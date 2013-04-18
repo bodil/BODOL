@@ -1,7 +1,7 @@
-(ns dolan.eval.primtypes
-  (:require [dolan.eval.core :as eval]
-            [dolan.types :as t])
-  (:import [dolan.types LNumber LString LSymbol LBoolean]))
+(ns liger.eval.primtypes
+  (:require [liger.eval.core :as eval]
+            [liger.types :as t])
+  (:import [liger.types LNumber LString LSymbol LBoolean]))
 
 (extend-protocol eval/Eval
   LNumber

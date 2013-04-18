@@ -1,8 +1,8 @@
-(ns dolan.test
+(ns liger.test
   (:refer-clojure :exclude [test])
   (:require [clojure.test :refer [deftest is]]
-            [dolan.repl :as repl])
-  (:import [dolan.types LBoolean]))
+            [liger.repl :as repl])
+  (:import [liger.types LBoolean]))
 
 (defmacro test [name & forms]
   `(deftest ~name
@@ -118,3 +118,9 @@
   (define one-and (triplet 1))
   (define one-and-two-and (one-and 2))
   (= '(1 2 3) (one-and-two-and 3)))
+
+(test recursion-with-recur
+  (define fib (λ n -> (cond
+                       (<= n 1) n
+                       true (+ (recur (- n 1)) (recur (- n 2))))))
+  (= 55 (fib 10)))
