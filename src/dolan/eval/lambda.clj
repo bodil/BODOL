@@ -1,6 +1,6 @@
 (ns dolan.eval.lambda
   (:require [dolan.eval.core :as eval]
-            [dolan.lambda :refer [lambda?]])
+            [dolan.lambda :refer [curry lambda?]])
   (:import [dolan.types LCons]))
 
 (defn- invoke-clause [{:keys [args body]} arg-vals scope]
@@ -10,13 +10,18 @@
 
 (defn invoke [func args]
   (fn [outer-scope]
-    (let [{:keys [clauses arity scope]} func
-          [args outer-scope] (eval/map-eval outer-scope args)]
+    (let [{:keys [clauses arity scope curried-args]} func
+          [args outer-scope] (eval/map-eval outer-scope args)
+          args (concat curried-args args)
+          call-arity (count args)]
       (cond
-       (not= arity (count args))
+       (> call-arity arity)
        (throw (ex-info (str "function of arity " arity " invoked with "
-                            (count args) " arguments " args)
+                            call-arity " arguments " args)
                        {:args args :func func}))
+
+       (< call-arity arity)
+       [(curry func args) outer-scope]
 
        :else
        [(invoke-clause (first clauses) args scope) outer-scope]))))

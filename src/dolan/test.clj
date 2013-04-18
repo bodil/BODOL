@@ -82,3 +82,9 @@
     (λ -> (define foo "barfoo")))
   (bar)
   (= foo "foobar"))
+
+(test currying
+  (define triplet (λ a b c -> (cons a (cons b (cons c ())))))
+  (define one-and (triplet 1))
+  (define one-and-two-and (one-and 2))
+  (= '(1 2 3) (one-and-two-and 3)))

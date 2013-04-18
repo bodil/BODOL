@@ -8,12 +8,23 @@
 
 (def ^:private alphabet "abcdefghijklmnopqrstuvwxyz")
 
-(defrecord Lambda [clauses arity scope]
+(defn gen-args [num]
+  (map str (take num alphabet)))
+
+(defprotocol Currying
+  (curry [this args]))
+
+(defrecord Lambda [clauses arity scope curried-args]
   Object
   (toString [this]
-    (let [vars (take (inc arity) alphabet)]
-      (str "(λ " (if (zero? arity) (str "-> " (first vars))
-                     (string/join " -> " vars)) ")"))))
+    (let [vars (gen-args (- (inc arity) (count curried-args)))]
+      (str "(λ "
+           (if (zero? arity) (str "-> " (first vars))
+               (string/join " -> " vars)) ")")))
+
+  Currying
+  (curry [this args]
+    (Lambda. clauses arity scope args)))
 
 (defn lambda? [val]
   (instance? Lambda val))
@@ -53,5 +64,5 @@
 (defn lambda [args]
   (fn [scope]
     (let [[clauses arity] (parse-def args)
-          f (Lambda. clauses arity scope)]
+          f (Lambda. clauses arity scope [])]
       [f scope])))
