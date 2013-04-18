@@ -22,4 +22,4 @@
       first))
 
 (defmacro eval-form [& forms]
-  `(eval-forms (list ~@(for [form forms] `(quote ~form)))))
+  `(t/pr-value (eval-forms (list ~@(for [form forms] `(quote ~form))))))
