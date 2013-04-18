@@ -1,7 +1,7 @@
 (ns dolan.primitives
   (:refer-clojure :exclude [eval])
   (:require [dolan.eval.core :as eval]
-            [dolan.types :refer [cons-list]]
+            [dolan.types :refer [cons-list car cdr]]
             [dolan.monad :as m]
             [dolan.types :as t]
             [dolan.lambda :refer [lambda]])
@@ -58,12 +58,12 @@
 
 (defprim l-car [list]
   (if (t/cons-list? list)
-    (first list)
+    (when list (car list))
     (throw (ex-info "car called with non-list" {}))))
 
 (defprim l-cdr [list]
   (if (t/cons-list? list)
-    (apply cons-list (rest list))
+    (when list (cdr list))
     (throw (ex-info "cdr called with non-list" {}))))
 
 (defprim l-atom? [value]
