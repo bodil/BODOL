@@ -20,9 +20,25 @@
   (= 1337 1337)
   (= "this is dog fort" "this is dog fort")
   (= '(1 3 3 7) '(1 3 3 7))
+  (= '(1 3 '(3 '(7))) '(1 3 '(3 '(7))))
   (= 'symbolo 'symbolo)
   (= true true)
   (= false false))
+
+(tests disequality
+  (not (= 1337 1338))
+  (not (= 'foo "foo"))
+  (not (= 'foo 'food))
+  (not (= "foo" "bar"))
+  (not (= true false))
+  (not (= '(1 2 3) '(1 2 4)))
+  (not (= '(1 2 '(3)) '(1 2 3)))
+  ;; fyi, JS:
+  (not (= 1337 "1337"))
+  (not (= true 1))
+  (not (= false 0))
+  (not (= true "non-empty string"))
+  (not (= false ())))
 
 (tests cond
   (cond (= "foo" "bar") false
