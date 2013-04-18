@@ -1,6 +1,6 @@
 (ns dolan.primitives
   (:refer-clojure :exclude [eval])
-  (:require [dolan.eval :as eval]
+  (:require [dolan.eval.core :as eval]
             [dolan.types :refer [cons-list]]
             [dolan.monad :as m]
             [dolan.types :as t]
