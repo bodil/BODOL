@@ -93,4 +93,5 @@
    (or (true? form) (false? form)) (LBoolean. form)
    (symbol? form) (LSymbol. (name form))
    :else (throw (ex-info (str "cljvalue " (pr-str form)
-                              " has no corresponding type")))))
+                              " has no corresponding type")
+                         {:form form}))))
