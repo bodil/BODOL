@@ -1,6 +1,6 @@
-(ns liger.eval.core
+(ns bodol.eval.core
   (:refer-clojure :exclude [eval])
-  (:require [liger.monad :as m]))
+  (:require [bodol.monad :as m]))
 
 (defprotocol Eval
   (-eval [this]))

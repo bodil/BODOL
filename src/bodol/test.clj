@@ -1,8 +1,8 @@
-(ns liger.test
+(ns bodol.test
   (:refer-clojure :exclude [test])
   (:require [clojure.test :refer [deftest is]]
-            [liger.repl :as repl])
-  (:import [liger.types LBoolean]))
+            [bodol.repl :as repl])
+  (:import [bodol.types LBoolean]))
 
 (defmacro test [name & forms]
   `(deftest ~name
@@ -137,3 +137,9 @@
     1 -> 1
     n -> (+ (fib (- n 1)) (fib (- n 2))))
   (= 55 (fib 10)))
+
+(test smarter-pattern-matching
+  (ƒ map
+     f () -> ()
+     f (head . tail) -> (cons (f head) (map tail)))
+  (= '(2 3 4) (map (λ a -> (+ a 1)) '(1 2 3))))

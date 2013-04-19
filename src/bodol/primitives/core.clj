@@ -1,10 +1,10 @@
-(ns liger.primitives.core
+(ns bodol.primitives.core
   (:refer-clojure :exclude [eval])
-  (:require [liger.eval :as eval]
-            [liger.eval.lambda :as lambda]
-            [liger.types :refer [cons-list car cdr]]
-            [liger.types :as t])
-  (:import [liger.types LCons LBoolean LNumber]))
+  (:require [bodol.eval :as eval]
+            [bodol.eval.lambda :as lambda]
+            [bodol.types :refer [cons-list car cdr]]
+            [bodol.types :as t])
+  (:import [bodol.types LCons LBoolean LNumber]))
 
 (defn l-quote [[value]]
   (fn [scope]

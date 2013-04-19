@@ -1,9 +1,9 @@
-(ns liger.eval.lambda
-  (:require [liger.eval.core :as eval]
-            [liger.lambda :refer [curry lambda?]]
-            [liger.types :as t]
-            [liger.monad :as m :refer [state-id]])
-  (:import [liger.types LCons LSymbol]))
+(ns bodol.eval.lambda
+  (:require [bodol.eval.core :as eval]
+            [bodol.lambda :refer [curry lambda?]]
+            [bodol.types :as t]
+            [bodol.monad :as m :refer [state-id]])
+  (:import [bodol.types LCons LSymbol]))
 
 (defn- match-arg [matcher arg]
   (cond

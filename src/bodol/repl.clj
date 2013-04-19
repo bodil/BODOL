@@ -1,10 +1,10 @@
-(ns liger.repl
+(ns bodol.repl
   (:refer-clojure :exclude [eval])
-  (:require [liger.eval :as eval]
-            [liger.parser :as parser]
-            [liger.scope :as scope]
-            [liger.monad :as m]
-            [liger.types :as t]))
+  (:require [bodol.eval :as eval]
+            [bodol.parser :as parser]
+            [bodol.scope :as scope]
+            [bodol.monad :as m]
+            [bodol.types :as t]))
 
 (defn eval
   ([scope string]

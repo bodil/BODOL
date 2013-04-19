@@ -1,8 +1,8 @@
-(ns liger.lambda
+(ns bodol.lambda
   (:require [clojure.core.match :refer [match]]
             [clojure.string :as string]
-            [liger.parser :refer [parse]]
-            [liger.types :as t]))
+            [bodol.parser :refer [parse]]
+            [bodol.types :as t]))
 
 (def prog (first (parse "(a b -> (cons a b))")))
 

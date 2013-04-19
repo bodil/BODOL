@@ -1,4 +1,4 @@
-(ns liger.types
+(ns bodol.types
   (:require [clojure.string :as string]
             [clojure.walk :as walk]))
 

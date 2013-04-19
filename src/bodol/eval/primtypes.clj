@@ -1,7 +1,7 @@
-(ns liger.eval.primtypes
-  (:require [liger.eval.core :as eval]
-            [liger.types :as t])
-  (:import [liger.types LNumber LString LSymbol LBoolean]))
+(ns bodol.eval.primtypes
+  (:require [bodol.eval.core :as eval]
+            [bodol.types :as t])
+  (:import [bodol.types LNumber LString LSymbol LBoolean]))
 
 (extend-protocol eval/Eval
   LNumber

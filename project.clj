@@ -1,6 +1,6 @@
-(defproject org.bodil/liger "0.1.0"
-  :description "gooby pls"
-  :url "https://github.com/bodil/liger"
+(defproject org.bodil/bodol "0.1.0"
+  :description "The BODil Oriented Language (working title)"
+  :url "https://github.com/bodil/bodol"
   :license {:name "Apache License, version 2.0"
             :url "http://www.apache.org/licenses/LICENSE-2.0.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]

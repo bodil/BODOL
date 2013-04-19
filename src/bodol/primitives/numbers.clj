@@ -1,8 +1,8 @@
-(ns liger.primitives.numbers
-  (:require [liger.eval :as eval]
-            [liger.types :as t]
-            [liger.primitives.core :refer [defprim]])
-  (:import [liger.types LNumber LBoolean]))
+(ns bodol.primitives.numbers
+  (:require [bodol.eval :as eval]
+            [bodol.types :as t]
+            [bodol.primitives.core :refer [defprim]])
+  (:import [bodol.types LNumber LBoolean]))
 
 (defmacro defnumf [name args & body]
   `(defprim ~name ~args

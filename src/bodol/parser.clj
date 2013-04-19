@@ -1,8 +1,8 @@
-(ns liger.parser
+(ns bodol.parser
   (:require [instaparse.core :as insta]
             [clojure.edn :as edn]
-            [liger.types :as t])
-  (:import [liger.types LBoolean LNumber LString LSymbol LCons]))
+            [bodol.types :as t])
+  (:import [bodol.types LBoolean LNumber LString LSymbol LCons]))
 
 (def parser
   (insta/parser

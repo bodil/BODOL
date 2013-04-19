@@ -1,7 +1,7 @@
-(ns liger.primitives
-  (:require [liger.lambda :refer [lambda defun]]
-            [liger.primitives.core :as core]
-            [liger.primitives.numbers :as numbers]))
+(ns bodol.primitives
+  (:require [bodol.lambda :refer [lambda defun]]
+            [bodol.primitives.core :as core]
+            [bodol.primitives.numbers :as numbers]))
 
 (defn primitives []
   (merge core/primitives
