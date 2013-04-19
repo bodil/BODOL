@@ -1,0 +1,2 @@
+#!/bin/sh
+rlwrap -r -m -q '\"' -b "(){}[],^%3@\";:'" -ppurple lein trampoline run
