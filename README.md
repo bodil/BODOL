@@ -18,7 +18,16 @@ suite.
 A Taste of BODOL
 ----------------
 
-Function declaration with pattern matching:
+Functional hello world:
+
+```lisp
+(ƒ fib
+  0 -> 0
+  1 -> 1
+  n -> (+ (fib (- n 1)) (fib (- n 2))))
+```
+
+More advanced pattern matching:
 
 ```lisp
 (ƒ map
