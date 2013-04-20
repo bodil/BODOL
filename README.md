@@ -32,7 +32,7 @@ More advanced pattern matching:
 ```lisp
 (ƒ map
    f () -> ()
-   f (head . tail) -> (cons (f head) (map tail)))
+   f (head . tail) -> (cons (f head) (map f tail)))
 
 (= '(2 3 4) (map (λ a -> (+ a 1)) '(1 2 3))))
 ```
