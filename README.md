@@ -15,6 +15,16 @@ Preliminary goals which may or may not be possible to combine:
 This is a work in progress. Don't expect it to even run its own test
 suite.
 
+Inspiration
+-----------
+
+Clojure is great, but sometimes I miss static typing. Haskell is
+great, but sometimes I miss Lisp's elegantly simple syntax. Shen is a
+splendid compromise, but I found myself wishing it came with Haskell's
+uncompromising purity and Standard ML's straightforward type system.
+BODOL is my attempt at crossbreeding the three, with Shen obviously
+the major influence.
+
 A Taste of BODOL
 ----------------
 
