@@ -37,7 +37,7 @@ Functional hello world:
   n -> (+ (fib (- n 1)) (fib (- n 2))))
 ```
 
-More advanced pattern matching:
+More advanced pattern matching (be warned: currently unimplemented):
 
 ```lisp
 (ƒ map
