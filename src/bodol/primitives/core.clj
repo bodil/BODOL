@@ -61,16 +61,6 @@
     (t/lcons item list)
     (throw (ex-info "cons called with non-list" {}))))
 
-(defprim l-car [list]
-  (if (t/cons-list? list)
-    (when list (car list))
-    (throw (ex-info "car called with non-list" {}))))
-
-(defprim l-cdr [list]
-  (if (t/cons-list? list)
-    (when list (cdr list))
-    (throw (ex-info "cdr called with non-list" {}))))
-
 (defprim l-atom? [value]
   (t/lboolean (not (t/cons-list? value))))
 
@@ -88,8 +78,6 @@
    "recur" l-recur
    "cond" l-cond
    "cons" l-cons
-   "car" l-car
-   "cdr" l-cdr
    "atom?" l-atom?
    "=" l-eq
    "list" l-list})
