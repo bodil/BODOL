@@ -7,4 +7,5 @@
                  [instaparse "1.0.1"]
                  [org.clojure/core.match "0.2.0-alpha12"]
                  [org.clojure/core.logic "0.8.3"]]
+  :jvm-opts ["-Dfile.encoding=utf-8"]
   :main bodol.repl)
