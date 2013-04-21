@@ -61,9 +61,6 @@
     (t/lcons item list)
     (throw (ex-info "cons called with non-list" {}))))
 
-(defprim l-atom? [value]
-  (t/lboolean (not (t/cons-list? value))))
-
 (defprim l-list values
   (apply cons-list values))
 
@@ -75,5 +72,4 @@
    "recur" l-recur
    "cond" l-cond
    "cons" l-cons
-   "atom?" l-atom?
    "list" l-list})
