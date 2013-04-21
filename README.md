@@ -31,10 +31,14 @@ A Taste of BODOL
 Functional hello world:
 
 ```lisp
-(ƒ fib
+(ƒ factorial
+  0 -> 1
+  n -> (* n (factorial (- n 1))))
+
+(ƒ fibonacci
   0 -> 0
   1 -> 1
-  n -> (+ (fib (- n 1)) (fib (- n 2))))
+  n -> (+ (fibonacci (- n 1)) (fibonacci (- n 2))))
 ```
 
 More advanced pattern matching (be warned: currently unimplemented):
