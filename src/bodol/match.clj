@@ -17,7 +17,15 @@
 
   (find-match
    (list (t/clj->ltype '(1 2 3 4 5)))
-   (first (bodol.lambda/parse-def (t/clj->ltype '((head . tail) -> foo))))))
+   (first (bodol.lambda/parse-def (t/clj->ltype '((head . tail) -> foo)))))
+
+  (find-match
+   (list (t/lnumber 1337) (t/lnumber 1337))
+   (first (bodol.lambda/parse-def (t/clj->ltype '(a a -> foo a b -> bar)))))
+
+  (find-match
+   (list (t/lnumber 1337) (t/lnumber 1338))
+   (first (bodol.lambda/parse-def (t/clj->ltype '(a a -> foo a b -> bar))))))
 
 
 
@@ -45,7 +53,7 @@
      (sequential? v) :seq
      :else (type v))))
 (defmethod matcher LSymbol [v lvars]
-  (let [lvar (log/lvar (t/-value v))]
+  (let [lvar (log/lvar (t/-value v) false)]
     [lvar (conj lvars lvar)]))
 (defmethod matcher LCons [v lvars]
   (if (= v ())
@@ -59,10 +67,10 @@
   [v lvars])
 
 (defn- log-list [a d lvars]
-  (let [[a lvars-a] (matcher a [])
-        [d lvars-d] (matcher d [])]
+  (let [[a lvars-a] (matcher a #{})
+        [d lvars-d] (matcher d #{})]
     [(log/lcons a d)
-     (concat lvars lvars-a lvars-d)]))
+     (clojure.set/union lvars lvars-a lvars-d)]))
 
 (defmulti reconv #(cond (log/lcons? %) :cons
                         (sequential? %) :seq
@@ -78,7 +86,8 @@
 
 (defn match-clause [args clause]
   (let [args (matchable args)
-        [pattern lvars] (matcher (:args clause) [])
+        [pattern lvars] (matcher (:args clause) #{})
+        lvars (apply vector lvars)
         match (first
                (log/run 1 [q]
                  (log/== args pattern)

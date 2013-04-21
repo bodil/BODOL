@@ -164,3 +164,15 @@
      f () -> ()
      f (head . tail) -> (cons (f head) (map f tail)))
   (= '(2 3 4) (map (λ a -> (+ a 1)) '(1 2 3))))
+
+(test pattern-matching-repeating-values-1
+  (ƒ equals
+     a a -> true
+     a b -> false)
+  (not (equals 5 6)))
+
+(test pattern-matching-repeating-values-2
+  (ƒ equals
+     a a -> true
+     a b -> false)
+  (equals 5 5))
