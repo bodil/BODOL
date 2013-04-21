@@ -60,6 +60,10 @@ Currying:
 (= '(1 2 3) (one-and-two-and 3))
 ```
 
+Take a look at the theoretically comprehensive
+[test suite](src/bodol/test.clj) for examples of all the currently
+defined language features.
+
 Test Drive
 ----------
 
