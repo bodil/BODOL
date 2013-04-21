@@ -45,3 +45,37 @@ Currying:
 (define one-and-two-and (one-and 2))
 (= '(1 2 3) (one-and-two-and 3))
 ```
+
+Test Drive
+----------
+
+The BODOL prototype interpreter is written in Clojure, so you'll need
+to install [Leiningen](http://leiningen.org/) in order to run it.
+Optionally, you may also want to install
+[rlwrap](http://utopia.knoware.nl/~hlub/rlwrap/#rlwrap) for a better
+line editing experience. Once that's done, check out the BODOL repo,
+cd over there and type:
+
+```
+$ ./repl
+BODOL version 0.0.0
+You are in a maze of twisty little passages, all alike.
+→→
+```
+
+If you're discouraged by the curious absence of `λ` and `ƒ` on your
+keyboard, you can substitute Clojure's `fn` and `defn` or Common
+Lisp's `lambda` and `defun` respectively.
+
+If you're using Emacs, I find this helps:
+
+```elisp
+;; Keybindings for λ and ƒ
+(global-set-key (kbd "M-l") (lambda () (interactive) (insert "\u03bb"))) ;lambda
+(global-set-key (kbd "M-f") (lambda () (interactive) (insert "\u0192"))) ;function
+
+;; Launch the BODOL REPL in an inferior-lisp buffer
+(defun bodol-repl ()
+  (interactive)
+  (run-lisp "<path to your BODOL repo>/repl"))
+```
