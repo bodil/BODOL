@@ -168,11 +168,11 @@
 (test pattern-matching-repeating-values-1
   (ƒ equals
      a a -> true
-     a b -> false)
+     _ _ -> false)
   (not (equals 5 6)))
 
 (test pattern-matching-repeating-values-2
   (ƒ equals
      a a -> true
-     a b -> false)
+     _ _ -> false)
   (equals 5 5))

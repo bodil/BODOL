@@ -21,11 +21,11 @@
 
   (find-match
    (list (t/lnumber 1337) (t/lnumber 1337))
-   (first (bodol.lambda/parse-def (t/clj->ltype '(a a -> foo a b -> bar)))))
+   (first (bodol.lambda/parse-def (t/clj->ltype '(a a -> foo _ _ -> bar)))))
 
   (find-match
    (list (t/lnumber 1337) (t/lnumber 1338))
-   (first (bodol.lambda/parse-def (t/clj->ltype '(a a -> foo a b -> bar))))))
+   (first (bodol.lambda/parse-def (t/clj->ltype '(a a -> foo _ _ -> bar))))))
 
 
 
@@ -53,7 +53,9 @@
      (sequential? v) :seq
      :else (type v))))
 (defmethod matcher LSymbol [v lvars]
-  (let [lvar (log/lvar (t/-value v) false)]
+  (let [lvar (if (= (t/lsymbol "_") v)
+               (log/lvar "wildcard")
+               (log/lvar (t/-value v) false))]
     [lvar (conj lvars lvar)]))
 (defmethod matcher LCons [v lvars]
   (if (= v ())
@@ -82,9 +84,17 @@
           (reconv (clojure.core.logic.protocols/lnext v))))
 (defmethod reconv :default [v] v)
 
+(defn- real-lvar? [v]
+  (= (:oname v) (:name v)))
 
+(defn- binding-map [lvars vals]
+  (->> (partition 2 (interleave lvars vals))
+       (filter (fn [[lvar val]] (real-lvar? lvar)))
+       (map (fn [[lvar val]] [(:oname lvar) val]))
+       (apply concat)
+       (apply hash-map)))
 
-(defn match-clause [args clause]
+(defn- match-clause [args clause]
   (let [args (matchable args)
         [pattern lvars] (matcher (:args clause) #{})
         lvars (apply vector lvars)
@@ -92,8 +102,7 @@
                (log/run 1 [q]
                  (log/== args pattern)
                  (log/== q lvars)))
-        bindings (and match (zipmap (map :oname lvars)
-                                    (map reconv match)))]
+        bindings (and match (binding-map lvars (map reconv match)))]
     (and bindings
          [clause (fn [scope] [nil (merge scope bindings)])])))
 
