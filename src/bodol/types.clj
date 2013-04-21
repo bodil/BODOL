@@ -87,9 +87,21 @@
 
 
 
-(defn clj->ltype [form]
+(defn clj->ltype
+  "Convert a Clojure form into a BODOL form.
+
+This is NOT a generic function for converting Clojure values.
+Because of the special handling of BODOL cons cell syntax, it
+should ONLY be used for turning BODOL code written in Clojure
+into a BODOL data structure suitable for evaling."
+  [form]
   (cond
-   (list? form) (apply cons-list (map clj->ltype form))
+   (list? form)
+   (if (and (= 3 (count form))
+            (= '. (second form)))
+     (LCons. (clj->ltype (first form)) (clj->ltype (nth form 2)))
+     (apply cons-list (map clj->ltype form)))
+
    (number? form) (LNumber. form)
    (string? form) (LString. form)
    (or (true? form) (false? form)) (LBoolean. form)
