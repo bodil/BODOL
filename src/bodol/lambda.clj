@@ -2,7 +2,8 @@
   (:require [clojure.core.match :refer [match]]
             [clojure.string :as string]
             [bodol.parser :refer [parse]]
-            [bodol.types :as t]))
+            [bodol.types :as t]
+            [bodol.match :refer [find-match]]))
 
 (def prog (first (parse "(a b -> (cons a b))")))
 
@@ -11,10 +12,14 @@
 (defn gen-args [num]
   (map str (take num alphabet)))
 
-(defprotocol Currying
-  (curry [this args]))
+(defprotocol ILambda
+  (-arity [this])
+  (-scope [this])
+  (-curried-args [this])
+  (curry [this args])
+  (pattern-match [this args]))
 
-(defrecord Lambda [clauses arity scope curried-args]
+(deftype Lambda [clauses arity scope curried-args]
   Object
   (toString [this]
     (let [vars (gen-args (- (inc arity) (count curried-args)))]
@@ -22,15 +27,28 @@
            (if (zero? arity) (str "-> " (first vars))
                (string/join " -> " vars)) ")")))
 
-  Currying
+  (equals [this o]
+    (identical? this o))
+
+  ILambda
   (curry [this args]
-    (Lambda. clauses arity scope args)))
+    (Lambda. clauses arity scope args))
+
+  (pattern-match [this args]
+    (find-match args clauses))
+
+  (-arity [_] arity)
+  (-scope [_] scope)
+  (-curried-args [_] curried-args))
+
+(defmethod print-method Lambda [l ^java.io.Writer writer]
+  (.write writer (.toString l)))
 
 (defn lambda? [val]
   (instance? Lambda val))
 
 (defn- arrow? [val]
-  (and (t/lsymbol? val) (= "->" (:value val))))
+  (and (t/lsymbol? val) (= (t/lsymbol "->") val)))
 
 (defn- arg? [val]
   (not (arrow? val)))
@@ -70,7 +88,7 @@
 (defn defun [[name & args]]
   (fn [scope]
     (let [[clauses arity] (parse-def args)
-          name (:value name)
+          name (t/-value name)
           fn-scope (assoc scope name (scope "recur")
                           :name name)
           f (Lambda. clauses arity fn-scope [])

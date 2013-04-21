@@ -1,18 +1,17 @@
 (ns bodol.primitives.numbers
   (:require [bodol.eval :as eval]
             [bodol.types :as t]
-            [bodol.primitives.core :refer [defprim]])
-  (:import [bodol.types LNumber LBoolean]))
+            [bodol.primitives.core :refer [defprim]]))
 
 (defmacro defnumf [name args & body]
   `(defprim ~name ~args
-     (let ~(apply vector (interleave args (map (fn [x#] `(:value ~x#)) args)))
-       (LNumber. (do ~@body)))))
+     (let ~(apply vector (interleave args (map (fn [x#] `(t/-value ~x#)) args)))
+       (t/lnumber (do ~@body)))))
 
 (defmacro defboolf [name args & body]
   `(defprim ~name ~args
-     (let ~(apply vector (interleave args (map (fn [x#] `(:value ~x#)) args)))
-       (LBoolean. (do ~@body)))))
+     (let ~(apply vector (interleave args (map (fn [x#] `(t/-value ~x#)) args)))
+       (t/lboolean (do ~@body)))))
 
 (defnumf plus [n1 n2] (+ n1 n2))
 (defnumf minus [n1 n2] (- n1 n2))

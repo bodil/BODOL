@@ -19,8 +19,8 @@
   LSymbol
   (-eval [this]
     (fn [scope]
-      (if-let [val (scope (:value this))]
-        [val scope]
+      (if (contains? scope (t/-value this))
+        [(scope (t/-value this)) scope]
         (throw (ex-info (str "unbound symbol \"" this "\"")
                         {:value this :scope scope})))))
 

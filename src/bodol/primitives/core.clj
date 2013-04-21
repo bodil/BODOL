@@ -3,8 +3,7 @@
   (:require [bodol.eval :as eval]
             [bodol.eval.lambda :as lambda]
             [bodol.types :refer [cons-list car cdr]]
-            [bodol.types :as t])
-  (:import [bodol.types LCons LBoolean LNumber]))
+            [bodol.types :as t]))
 
 (defn l-quote [[value]]
   (fn [scope]
@@ -14,7 +13,7 @@
   (fn [scope]
     (let [[value scope] ((eval/eval value) scope)]
       (if (t/lsymbol? name)
-        [value (assoc scope (:value name) value)]
+        [value (assoc scope (t/-value name) value)]
         (throw (ex-info "define called with non-symbol"
                         {:args [name value] :scope scope}))))))
 
@@ -33,7 +32,7 @@
 
             (let [[test then] (first clauses)
                   [result scope] ((eval/eval test) scope)]
-              (if-not (or (nil? result) (= (LBoolean. false) result))
+              (if-not (or (nil? result) (= (t/lboolean false) result))
                 ((eval/eval then) scope)
                 (recur (rest clauses) scope)))))))))
 
@@ -59,7 +58,7 @@
 
 (defprim l-cons [item list]
   (if (t/cons-list? list)
-    (LCons. item list)
+    (t/lcons item list)
     (throw (ex-info "cons called with non-list" {}))))
 
 (defprim l-car [list]
@@ -73,10 +72,10 @@
     (throw (ex-info "cdr called with non-list" {}))))
 
 (defprim l-atom? [value]
-  (LBoolean. (not (t/cons-list? value))))
+  (t/lboolean (not (t/cons-list? value))))
 
 (defprim l-eq [v1 v2]
-  (LBoolean. (= v1 v2)))
+  (t/lboolean (= v1 v2)))
 
 (defprim l-list values
   (apply cons-list values))

@@ -3,37 +3,41 @@
             [clojure.walk :as walk]))
 
 (declare cons-list)
+
 (defn pr-value [value]
   (if (nil? value) "nil"
       (.toString value)))
 
-(defrecord LBoolean [value]
-  Object
-  (toString [_]
-    (if value "#t" "#f")))
+(defprotocol LType
+  (-value [this]))
 
-(defrecord LNumber [value]
-  Object
-  (toString [_]
-    (pr-str value)))
+(defmacro defltype [tname to-string]
+  (let [lname (clojure.string/lower-case (name tname))
+        lname? (symbol (str lname "?"))
+        lname (symbol lname)
+        cname (symbol (str (name tname) "."))]
+    `(do
+       (deftype ~tname [value#]
+         Object
+         (toString [_] (let [~'value value#] ~to-string))
+         (equals [_ o#]
+           (and (instance? ~tname o#) (= value# (-value o#))))
+         LType
+         (-value [_] value#))
 
-(defn lnumber? [value]
-  (instance? LNumber value))
+       (defn ~lname? [v#]
+         (instance? ~tname v#))
 
-(defrecord LString [value]
-  Object
-  (toString [_]
-    (pr-str value)))
+       (defn ~lname [v#]
+         (~cname v#)))))
 
-(defn lstring? [value]
-  (instance? LString value))
+(defltype LBoolean (if value "#t" "#f"))
+(defltype LNumber (pr-str value))
+(defltype LString (pr-str value))
+(defltype LSymbol value)
 
-(defrecord LSymbol [value]
-  Object
-  (toString [_] value))
-
-(defn lsymbol? [value]
-  (instance? LSymbol value))
+(defn atom? [value]
+  (some #(% value) [lboolean? lnumber? lstring? lsymbol?]))
 
 (declare cons-list?)
 (declare seq-cons-list)
@@ -42,27 +46,33 @@
   (car [this])
   [cdr [this]])
 
-(deftype LCons [head tail]
+(deftype LCons [a d]
   Object
   (toString [this]
     (if (cons-list? this)
       (str "(" (string/join " " (map pr-value this)) ")")
-      (str "(" head " . " tail ")")))
+      (str "(" a " . " d ")")))
   (equals [this other]
     (and (instance? LCons other)
-         (= head (car other))
-         (= tail (cdr other))))
+         (= a (car other))
+         (= d (cdr other))))
+
+  LType
+  (-value [this] (seq this))
 
   ConsCell
-  (car [this] head)
-  (cdr [this] tail)
+  (car [this] a)
+  (cdr [this] d)
 
   clojure.lang.Seqable
   (seq [this] (seq-cons-list this)))
 
+(defn lcons? [v] (instance? LCons v))
+(defn lcons [a d] (LCons. a d))
+
 (defn cons-list? [cell]
   (or (nil? cell)
-      (and (instance? LCons cell)
+      (and (lcons? cell)
            (cons-list? (cdr cell)))))
 
 (defn cons-list [& l]
@@ -74,16 +84,6 @@
   (lazy-seq
    (when-not (nil? cell)
      (cons (car cell) (cdr cell)))))
-
-(deftype LVector [values]
-  Object
-  (toString [this]
-    (if (cons-list? this)
-      (str "(" (string/join " " (map pr-value this)) ")")
-      (str "(" car " . " cdr ")")))
-
-  clojure.lang.Seqable
-  (seq [this] (seq values)))
 
 
 

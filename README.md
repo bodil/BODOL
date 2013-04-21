@@ -41,7 +41,7 @@ Functional hello world:
   n -> (+ (fibonacci (- n 1)) (fibonacci (- n 2))))
 ```
 
-More advanced pattern matching (be warned: currently unimplemented):
+More advanced pattern matching:
 
 ```lisp
 (ƒ map

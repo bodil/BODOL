@@ -1,6 +1,6 @@
 (ns bodol.test
   (:refer-clojure :exclude [test])
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.test :refer [deftest is run-tests]]
             [bodol.repl :as repl])
   (:import [bodol.types LBoolean]))
 
@@ -131,15 +131,36 @@
                true (+ (fib (- n 1)) (fib (- n 2)))))
   (= 55 (fib 10)))
 
-(test dumb-pattern-matching
+(test basic-pattern-matching
   (ƒ fib
     0 -> 0
     1 -> 1
     n -> (+ (fib (- n 1)) (fib (- n 2))))
   (= 55 (fib 10)))
 
-(test smarter-pattern-matching
+(test nested-pattern-matching-1
+  (ƒ foo
+     (0 a) -> a
+     (a 0) -> a
+     (a b) -> (list a b))
+  (= 5 (foo '(0 5))))
+
+(test nested-pattern-matching-2
+  (ƒ foo
+     (0 a) -> a
+     (a 0) -> a
+     (a b) -> (list a b))
+  (= 5 (foo '(5 0))))
+
+(test nested-pattern-matching-3
+  (ƒ foo
+     (0 a) -> a
+     (a 0) -> a
+     (a b) -> (list a b))
+  (= '(4 5) (foo '(4 5))))
+
+(test iterating-pattern-matching
   (ƒ map
      f () -> ()
-     f (head . tail) -> (cons (f head) (map tail)))
+     f (head . tail) -> (cons (f head) (map f tail)))
   (= '(2 3 4) (map (λ a -> (+ a 1)) '(1 2 3))))
