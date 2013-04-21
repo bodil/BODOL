@@ -96,7 +96,7 @@ should ONLY be used for turning BODOL code written in Clojure
 into a BODOL data structure suitable for evaling."
   [form]
   (cond
-   (list? form)
+   (seq? form)
    (if (and (= 3 (count form))
             (= '. (second form)))
      (LCons. (clj->ltype (first form)) (clj->ltype (nth form 2)))
