@@ -79,7 +79,7 @@ Lisp's `lambda` and `defun` respectively.
 
 If you're using Emacs, I find this helps:
 
-```elisp
+```lisp
 ;; Keybindings for λ and ƒ
 (global-set-key (kbd "M-l") (lambda () (interactive) (insert "\u03bb"))) ;lambda
 (global-set-key (kbd "M-f") (lambda () (interactive) (insert "\u0192"))) ;function
