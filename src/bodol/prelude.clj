@@ -5,6 +5,10 @@
        true -> false
        false -> true)
 
+    (ƒ =
+       a a -> true
+       _ _ -> false)
+
     (ƒ car
        () -> ()
        (a . _) -> a)

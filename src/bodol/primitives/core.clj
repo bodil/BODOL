@@ -64,9 +64,6 @@
 (defprim l-atom? [value]
   (t/lboolean (not (t/cons-list? value))))
 
-(defprim l-eq [v1 v2]
-  (t/lboolean (= v1 v2)))
-
 (defprim l-list values
   (apply cons-list values))
 
@@ -79,5 +76,4 @@
    "cond" l-cond
    "cons" l-cons
    "atom?" l-atom?
-   "=" l-eq
    "list" l-list})
