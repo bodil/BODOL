@@ -22,7 +22,7 @@ NUMBER = NEGATIVE* (FRACTION | DECIMAL | INTEGER)
 <DECIMAL> = INTEGER '.' INTEGER
 <INTEGER> = #'\\p{Digit}+'
 STRING = '\\\"' #'([^\"\\\\]|\\\\.)*' '\\\"'
-SYMBOL = #'[\\p{IsAlphabetic}_$&/=+~:<>|§?*-][\\p{IsAlphabetic}\\{Digit}_$&/=+~.:<>|§?*-]*'
+SYMBOL = #'[\\pL_$&/=+~:<>|§?*-][\\pL\\{Digit}_$&/=+~.:<>|§?*-]*'
 <SPACE> = <(' ' | '\t' | '\n' | ',')+>
 "))
 
