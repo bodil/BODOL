@@ -53,26 +53,30 @@
      (sequential? v) :seq
      :else (type v))))
 (defmethod matcher LSymbol [v lvars]
-  (let [lvar (if (= (t/lsymbol "_") v)
-               (log/lvar "wildcard")
-               (log/lvar (t/-value v) false))]
-    [lvar (conj lvars lvar)]))
+  (let [name (t/-value v)]
+    (if (= "_" name)
+      [(log/lvar "wildcard") lvars]
+
+      (if (contains? lvars name)
+       [(get lvars name) lvars]
+
+       (let [lvar (log/lvar name false)]
+         [lvar (assoc lvars name lvar)])))))
 (defmethod matcher LCons [v lvars]
   (if (= v ())
-    nil
+    [nil lvars]
     (log-list (t/car v) (t/cdr v) lvars)))
 (defmethod matcher :seq [v lvars]
   (if (= v ())
-    nil
+    [nil lvars]
     (log-list (first v) (rest v) lvars)))
 (defmethod matcher :default [v lvars]
   [v lvars])
 
 (defn- log-list [a d lvars]
-  (let [[a lvars-a] (matcher a #{})
-        [d lvars-d] (matcher d #{})]
-    [(log/lcons a d)
-     (clojure.set/union lvars lvars-a lvars-d)]))
+  (let [[a lvars] (matcher a lvars)
+        [d lvars] (matcher d lvars)]
+    [(log/lcons a d) lvars]))
 
 (defmulti reconv #(cond (log/lcons? %) :cons
                         (sequential? %) :seq
@@ -96,8 +100,8 @@
 
 (defn- match-clause [args clause]
   (let [args (matchable args)
-        [pattern lvars] (matcher (:args clause) #{})
-        lvars (apply vector lvars)
+        [pattern lvars] (matcher (:args clause) {})
+        lvars (apply vector (vals lvars))
         match (first
                (log/run 1 [q]
                  (log/== args pattern)
