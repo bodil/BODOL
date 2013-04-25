@@ -2,7 +2,8 @@
   (:require [bodol.eval.core :as eval]
             [bodol.lambda :as l]
             [bodol.types :as t])
-  (:import [bodol.types LCons]))
+  (:import [bodol.types LCons]
+           [bodol.lambda Lambda]))
 
 
 
@@ -10,6 +11,9 @@
   (fn [outer-scope]
     (let [arity (l/-arity func)
           scope (l/-scope func)
+          scope (if-let [name (l/-name func)]
+                  (assoc scope name func)
+                  scope)
           curried-args (l/-curried-args func)
           [args outer-scope] (eval/map-eval outer-scope args)
           args (concat curried-args args)
@@ -38,8 +42,18 @@
                       (clojure.string/join " " (map t/pr-value args)) ")")
                  {:args args :scope outer-scope :function func})))))))
 
-(extend-type LCons
-  eval/Eval
+(extend-protocol eval/Eval
+  Lambda
+  (-eval [this]
+    (fn [scope]
+      (if-let [name (l/-name this)]
+        (let [this (l/bind this scope)
+              scope (assoc scope name this)]
+          [this scope])
+        (let [this (l/bind this scope)]
+          [this scope]))))
+
+  LCons
   (eval/-eval [this]
     (fn [scope]
       (let [[func & args] (seq this)

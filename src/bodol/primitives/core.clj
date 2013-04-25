@@ -3,7 +3,8 @@
   (:require [bodol.eval :as eval]
             [bodol.eval.lambda :as lambda]
             [bodol.types :refer [cons-list car cdr]]
-            [bodol.types :as t]))
+            [bodol.types :as t]
+            [bodol.monad :as m]))
 
 (defn l-quote [[value]]
   (fn [scope]
@@ -43,6 +44,29 @@
       (throw (ex-info "recur called outside lambda"
                       {:args args :scope scope})))))
 
+(defn l-asserts [[name & asserts]]
+  (fn [scope]
+    (loop [scope scope asserts asserts]
+      (if-not (seq asserts)
+        [(t/lboolean true) scope]
+
+        (let [form (first asserts)
+              [result scope] ((eval/eval form) scope)]
+          (when-not (= (t/lboolean true) result)
+            (throw (ex-info (str "Assert in " (t/-value name) " failed:\n"
+                                 "    " form
+                                 " -> " result "\n") {})))
+          (recur scope (rest asserts)))))))
+
+(defn l-assert [[name & body]]
+  (fn [scope]
+    (let [[result scope] (m/reduce-state scope (map eval/eval body))]
+      (when-not (= (t/lboolean true) result)
+        (throw (ex-info (str "Assert in " (t/-value name) " failed:\n"
+                             "    " (last body)
+                             " -> " result "\n") {}))))
+    [(t/lboolean true) scope]))
+
 
 
 (defmacro defprim [name bindings & body]
@@ -71,5 +95,7 @@
    "define" l-define
    "recur" l-recur
    "cond" l-cond
+   "asserts" l-asserts
+   "assert" l-assert
    "cons" l-cons
    "list" l-list})

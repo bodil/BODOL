@@ -1,6 +1,7 @@
 (ns bodol.eval.primtypes
   (:require [bodol.eval.core :as eval]
-            [bodol.types :as t])
+            [bodol.types :as t]
+            [bodol.lambda :as l])
   (:import [bodol.types LNumber LString LSymbol LBoolean]))
 
 (extend-protocol eval/Eval

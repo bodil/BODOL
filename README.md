@@ -61,7 +61,7 @@ Currying:
 ```
 
 Take a look at the theoretically comprehensive
-[test suite](src/bodol/test.clj) for examples of all the currently
+[test suite](src/bodol/test.bodol) for examples of all the currently
 defined language features.
 
 Test Drive

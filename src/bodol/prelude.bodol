@@ -1,0 +1,24 @@
+(ƒ atom?
+  () -> #f
+  (_ . _) -> #f
+  _ -> #t)
+
+(ƒ not
+  #t -> #f
+  #f -> #t)
+
+(ƒ =
+  a a -> #t
+  _ _ -> #f)
+
+(ƒ car
+  () -> ()
+  (a . _) -> a)
+
+(ƒ cdr
+  () -> ()
+  (_ . d) -> d)
+
+(ƒ caar l -> (car (car l)))
+(ƒ cadr l -> (car (cdr l)))
+(ƒ cddr l -> (cdr (cdr l)))

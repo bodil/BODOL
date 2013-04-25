@@ -5,10 +5,4 @@
 
 (defn primitives []
   (merge core/primitives
-         numbers/primitives
-         {"λ" lambda
-          "fn" lambda
-          "lambda" lambda
-          "ƒ" defun
-          "defn" defun
-          "defun" defun}))
+         numbers/primitives))

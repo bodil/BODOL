@@ -7,5 +7,5 @@
 
 (defn scope []
   (-> (primitives)
-      (m/reduce-state (map (comp eval/eval t/clj->ltype) prelude))
+      (m/reduce-state (map eval/eval prelude))
       second))
