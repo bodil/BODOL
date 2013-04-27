@@ -97,3 +97,10 @@ If you're using Emacs, I find this helps:
   (interactive)
   (run-lisp "<path to your BODOL repo>/repl"))
 ```
+On Vim, to achieve the same ƒ and λ keybindings:
+
+```vim
+" Keybindings for λ and ƒ
+:inoremap <A-l> <C-v>u3bb<Space>
+:inoremap <A-f> <C-v>u192<Space>
+```
