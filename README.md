@@ -78,15 +78,16 @@ You are in a maze of twisty little passages, all alike.
 →→
 ```
 
-## What's with those non-ASCII characters?
+# What's with those non-ASCII characters?
 
 If you're discouraged by the curious absence of `λ` and `ƒ` on your
 keyboard, you can substitute Clojure's `fn` and `defn` or Common
 Lisp's `lambda` and `defun` respectively.
 
-### Emacs bindings
+## Emacs bindings
 
-If you're using Emacs, I find this helps:
+If you're using Emacs, I find it helps to bind `ƒ` and `λ` to `M-f`
+and `M-l` (Alt+F and Alt+L) respectively.
 
 ```lisp
 ;; Keybindings for λ and ƒ
@@ -99,14 +100,27 @@ If you're using Emacs, I find this helps:
   (run-lisp "<path to your BODOL repo>/repl"))
 ```
 
-### Vim bindings
+## Vim bindings
 
-Add this snippet to your `.vimrc` to configure some keybindings for `ƒ` and `λ`:
+Add this snippet to your `.vimrc` to enable the same keybindings for vim.
 
 ```vim
 " Keybindings for λ and ƒ
 :inoremap <A-l> <C-v>u3bb<Space>
 :inoremap <A-f> <C-v>u192<Space>
+```
+
+## Mac OS X keybindings
+
+If you're using Mac OS X, you can enable these keybindings globally by
+adding the following snippet to
+`~/Library/KeyBindings/DefaultKeyBinding.dict`.
+
+```
+{
+"~f" = ("insertText:", "\U0192"); /* alt + f ~> florin */
+"~l" = ("insertText:", "\U03BB"); /* alt + l ~> lambda */
+}
 ```
 
 # License
