@@ -15,8 +15,7 @@ Preliminary goals which may or may not be possible to combine:
 This is a work in progress. Don't expect it to even run its own test
 suite.
 
-Inspiration
------------
+# Inspiration
 
 Clojure is great, but sometimes I miss static typing. Haskell is
 great, but sometimes I miss Lisp's elegantly simple syntax. Shen is a
@@ -25,8 +24,7 @@ uncompromising purity and Standard ML's straightforward type system.
 BODOL is my attempt at crossbreeding the three, with Shen obviously
 the major influence.
 
-A Taste of BODOL
-----------------
+# A Taste of BODOL
 
 Functional hello world:
 
@@ -64,8 +62,7 @@ Take a look at the theoretically comprehensive
 [test suite](src/bodol/test.bodol) for examples of all the currently
 defined language features.
 
-Test Drive
-----------
+# Test Drive
 
 The BODOL prototype interpreter is written in Clojure, so you'll need
 to install [Leiningen](http://leiningen.org/) in order to run it.
@@ -81,9 +78,13 @@ You are in a maze of twisty little passages, all alike.
 →→
 ```
 
+## What's with those non-ASCII characters?
+
 If you're discouraged by the curious absence of `λ` and `ƒ` on your
 keyboard, you can substitute Clojure's `fn` and `defn` or Common
 Lisp's `lambda` and `defun` respectively.
+
+### Emacs bindings
 
 If you're using Emacs, I find this helps:
 
@@ -97,7 +98,10 @@ If you're using Emacs, I find this helps:
   (interactive)
   (run-lisp "<path to your BODOL repo>/repl"))
 ```
-On Vim, to achieve the same ƒ and λ keybindings:
+
+### Vim bindings
+
+Add this snippet to your `.vimrc` to configure some keybindings for `ƒ` and `λ`:
 
 ```vim
 " Keybindings for λ and ƒ
