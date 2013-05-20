@@ -74,7 +74,7 @@
   (not (>= 3 5)))
 
 (assert basic-lambda
-  (= '("omg" "lol") ((λ a -> (cons a '("lol"))) "omg")))
+  (= '("omg" "lol") ((λ a → (cons a '("lol"))) "omg")))
 
 (assert define-in-scope
   (define foo "foobar")
@@ -82,44 +82,44 @@
 
 (assert lexical-scope
   (ƒ constantly
-    a -> (λ -> a))
+    a → (λ → a))
   (= "foo" ((constantly "foo"))))
 
 (assert define-stays-in-local-scope
   (define foo "foobar")
-  (ƒ bar -> (define foo "barfoo"))
+  (ƒ bar → (define foo "barfoo"))
   (bar)
   (= foo "foobar"))
 
 (assert currying
-  (ƒ triplet a b c -> (list a b c))
+  (ƒ triplet a b c → (list a b c))
   (define one-and (triplet 1))
   (define one-and-two-and (one-and 2))
   (= '(1 2 3) (one-and-two-and 3)))
 
 (assert recursion-with-recur
-  (define fib (λ n -> (cond
+  (define fib (λ n → (cond
                        (<= n 1) n
                        #t (+ (recur (- n 1)) (recur (- n 2))))))
   (= 55 (fib 10)))
 
 (assert recursion-with-named-function
-  (ƒ fib n -> (cond
+  (ƒ fib n → (cond
                (<= n 1) n
                #t (+ (fib (- n 1)) (fib (- n 2)))))
   (= 55 (fib 10)))
 
 (assert basic-pattern-matching
   (ƒ fib
-     0 -> 0
-     1 -> 1
-     n -> (+ (fib (- n 1)) (fib (- n 2))))
+     0 → 0
+     1 → 1
+     n → (+ (fib (- n 1)) (fib (- n 2))))
   (= 55 (fib 10)))
 
 (ƒ foo
-  (0 a) -> a
-  (a 0) -> a
-  (a b) -> (list a b))
+  (0 a) → a
+  (a 0) → a
+  (a b) → (list a b))
 
 (asserts nested-pattern-matching
   (= 5 (foo '(0 5)))
@@ -128,14 +128,22 @@
 
 (assert iterating-pattern-matching
   (ƒ map
-     f () -> ()
-     f (head . tail) -> (cons (f head) (map f tail)))
-  (= '(2 3 4) (map (λ a -> (+ a 1)) '(1 2 3))))
+     f () → ()
+     f (head . tail) → (cons (f head) (map f tail)))
+  (= '(2 3 4) (map (λ a → (+ a 1)) '(1 2 3))))
 
 (ƒ equals
-  a a -> #t
-  _ _ -> #f)
+  a a → #t
+  _ _ → #f)
 
 (asserts pattern-matching-repeating-values
   (not (equals 5 6))
   (equals 5 5))
+
+(ƒ rember
+  _ () → ()
+  a (a . d) → (rember a d)
+  a (b . d) → (cons b (rember a d)))
+
+(asserts rembero
+  (= '(a b d e) (rember 'c '(a b c d e))))

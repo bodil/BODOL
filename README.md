@@ -40,29 +40,29 @@ Functional hello world:
 
 ```lisp
 (ƒ factorial
-  0 -> 1
-  n -> (* n (factorial (- n 1))))
+  0 → 1
+  n → (* n (factorial (- n 1))))
 
 (ƒ fibonacci
-  0 -> 0
-  1 -> 1
-  n -> (+ (fibonacci (- n 1)) (fibonacci (- n 2))))
+  0 → 0
+  1 → 1
+  n → (+ (fibonacci (- n 1)) (fibonacci (- n 2))))
 ```
 
 More advanced pattern matching:
 
 ```lisp
 (ƒ map
-   f () -> ()
-   f (head . tail) -> (cons (f head) (map f tail)))
+   f () → ()
+   f (head . tail) → (cons (f head) (map f tail)))
 
-(= '(2 3 4) (map (λ a -> (+ a 1)) '(1 2 3))))
+(= '(2 3 4) (map (λ a → (+ a 1)) '(1 2 3))))
 ```
 
 Currying:
 
 ```lisp
-(ƒ triplet a b c -> (list a b c))
+(ƒ triplet a b c → (list a b c))
 (define one-and (triplet 1))
 (define one-and-two-and (one-and 2))
 (= '(1 2 3) (one-and-two-and 3))
@@ -90,19 +90,26 @@ You are in a maze of twisty little passages, all alike.
 
 # What's with those non-ASCII characters?
 
-If you're discouraged by the curious absence of `λ` and `ƒ` on your
-keyboard, you can substitute Clojure's `fn` and `defn` or Common
-Lisp's `lambda` and `defun` respectively.
+If you're discouraged by the curious absence of `λ`, `ƒ` and `→` on
+your keyboard, you can substitute Clojure's `fn` and `defn` or Common
+Lisp's `lambda` and `defun` for `λ` and `ƒ` respectively, and `->` for
+`→`.
+
+I realise some people feel very strongly that using non-ASCII
+characters in a programming language syntax, even optionally, is
+reckless, irresponsible and heretical. BODOL is probably not a great
+fit for those people.
 
 ## Emacs bindings
 
-If you're using Emacs, I find it helps to bind `ƒ` and `λ` to `M-f`
-and `M-l` (Alt+F and Alt+L) respectively.
+If you're using Emacs, I find it helps to bind `ƒ`, `λ` and `→` to
+`M-f`, `M-l` and `M--` (Alt+F, Alt+L and Alt+Minus) respectively.
 
 ```lisp
-;; Keybindings for λ and ƒ
+;; Keybindings for special symbols
 (global-set-key (kbd "M-l") (lambda () (interactive) (insert "\u03bb"))) ;lambda
 (global-set-key (kbd "M-f") (lambda () (interactive) (insert "\u0192"))) ;function
+(global-set-key (kbd "M--") (lambda () (interactive) (insert "\u2192"))) ;right arrow
 
 ;; Launch the BODOL REPL in an inferior-lisp buffer
 (defun bodol-repl ()
@@ -118,6 +125,7 @@ Add this snippet to your `.vimrc` to enable the same keybindings for vim.
 " Keybindings for λ and ƒ
 :inoremap <A-l> <C-v>u3bb<Space>
 :inoremap <A-f> <C-v>u192<Space>
+:inoremap <A--> <C-v>u2192<Space>
 ```
 
 ## Mac OS X keybindings
@@ -130,6 +138,7 @@ adding the following snippet to
 {
 "~f" = ("insertText:", "\U0192"); /* alt + f ~> florin */
 "~l" = ("insertText:", "\U03BB"); /* alt + l ~> lambda */
+"~-" = ("insertText:", "\U2192"); /* alt + - ~> right arrow */
 }
 ```
 
