@@ -2,7 +2,7 @@
   (:refer-clojure :exclude [eval])
   (:require [bodol.eval :as eval]
             [bodol.eval.lambda :as lambda]
-            [bodol.types :refer [cons-list car cdr]]
+            [bodol.types :refer [llist car cdr]]
             [bodol.types :as t]
             [bodol.monad :as m]))
 
@@ -86,7 +86,7 @@
     (throw (ex-info "cons called with non-list" {}))))
 
 (defprim l-list values
-  (apply cons-list values))
+  (llist values))
 
 
 

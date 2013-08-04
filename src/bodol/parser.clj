@@ -36,25 +36,44 @@ SYMBOL = #'[\\pL_$&/=+~:<>|§?*-][\\pL\\p{Digit}_$&/=+~.:<>|§?*-]*'
 <SPACE> = <#'[ \t\n,]+'>
 "))
 
-(defmacro ltype [type]
-  `(fn [value#] (~(symbol (str (name type) ".")) value#)))
+(defn span [loc & els]
+  {:span
+   (reduce
+    (fn [v1 v2] [(min (first v1) (first v2))
+                (max (second v1) (second v2))])
+    (map insta/span els))
+   :location loc})
 
-(defn parse [input]
-  (insta/transform
-   {:BOOLEAN (comp (ltype LBoolean) (partial = "#t") str)
-    :NUMBER (comp (ltype LNumber) edn/read-string str)
-    :STRING (comp (ltype LString) edn/read-string str)
-    :SYMBOL (comp (ltype LSymbol) str)
-    :DOTTED #(LCons. %1 %2)
-    :LIST t/cons-list
-    :VECTOR vector
-    :QUOTED #(LCons. (LSymbol. "quote") (LCons. % nil))
-    :ARGS vector
-    :BODY identity
-    :CLAUSE vector
-    :LAMBDA l/lambda
-    :DEFUN l/defun}
-   (let [parsed (parser input)]
-     (if (insta/failure? parsed)
-       (throw (ex-info (pr-str (insta/get-failure parsed)) {}))
-       parsed))))
+(defn mktype [ltype transform loc input-val]
+  (ltype (transform (apply str (rest input-val))) (span loc input-val)))
+
+(defn transform [loc node]
+  (let [t (partial transform loc)
+        tmap (partial map t)]
+    (case (first node)
+      :LIST (t/llist (tmap (rest node)) (span loc node))
+      :DOTTED (apply t/lcons (span loc node) (tmap (rest node)))
+      :QUOTED (t/llist (list (t/lsymbol "quote")
+                             (t (second node)))
+                       (span loc node))
+      :SYMBOL (mktype t/lsymbol identity loc node)
+      :BOOLEAN (mktype t/lboolean (partial = "#t") loc node)
+      :NUMBER (mktype t/lnumber edn/read-string loc node)
+      :STRING (mktype t/lstring edn/read-string loc node)
+      :ARGS (apply vector (tmap (rest node)))
+      :BODY (t (second node))
+      :CLAUSE (apply vector (tmap (rest node)))
+      :LAMBDA (apply l/lambda (span loc node) (tmap (rest node)))
+      :DEFUN (apply l/defun (span loc node) (tmap (rest node))))))
+
+(defn parse
+  ([input loc]
+     (map (partial transform loc)
+          (let [parsed (parser input)]
+            (if (insta/failure? parsed)
+              (throw (ex-info (pr-str (insta/get-failure parsed)) {}))
+              parsed))))
+  ([input] (parse input nil)))
+
+(defn parse-file [filename]
+  (parse (slurp filename) filename))

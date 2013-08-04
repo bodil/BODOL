@@ -18,7 +18,7 @@
   (bind [this scope])
   (pattern-match [this args]))
 
-(deftype Lambda [name clauses arity scope curried-args]
+(deftype Lambda [pos name clauses arity scope curried-args]
   Object
   (toString [this]
     (let [vars (gen-args (- (inc arity) (count curried-args)))]
@@ -31,12 +31,15 @@
   (equals [this o]
     (identical? this o))
 
+  t/IPositioned
+  (-pos [this] pos)
+
   ILambda
   (curry [this args]
-    (Lambda. name clauses arity scope args))
+    (Lambda. pos name clauses arity scope args))
 
   (bind [this new-scope]
-    (Lambda. name clauses arity new-scope curried-args))
+    (Lambda. pos name clauses arity new-scope curried-args))
 
   (pattern-match [this args]
     (find-match args clauses))
@@ -61,10 +64,10 @@
 
      :else [cs ((comp count :args) (first cs))])))
 
-(defn lambda [& clauses]
+(defn lambda [pos & clauses]
   (let [[clauses arity] (parse-def clauses)]
-    (Lambda. nil clauses arity nil [])))
+    (Lambda. pos nil clauses arity nil [])))
 
-(defn defun [name & clauses]
+(defn defun [pos name & clauses]
   (let [[clauses arity] (parse-def clauses)]
-    (Lambda. (t/-value name) clauses arity nil [])))
+    (Lambda. pos (t/-value name) clauses arity nil [])))

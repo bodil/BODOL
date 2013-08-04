@@ -2,8 +2,6 @@
   (:require [clojure.string :as string]
             [clojure.walk :as walk]))
 
-(declare cons-list)
-
 (defn pr-value [value]
   (if (nil? value) "nil"
       (.toString value)))
@@ -11,30 +9,37 @@
 (defprotocol LType
   (-value [this]))
 
+(defprotocol IPositioned
+  (-pos [this]))
+
 (defmacro defltype [tname to-string]
   (let [lname (clojure.string/lower-case (name tname))
         lname? (symbol (str lname "?"))
         lname (symbol lname)
         cname (symbol (str (name tname) "."))]
     `(do
-       (deftype ~tname [value#]
+       (deftype ~tname [value# pos#]
          Object
          (toString [_] (let [~'value value#] ~to-string))
          (equals [_ o#]
            (and (instance? ~tname o#) (= value# (-value o#))))
          LType
-         (-value [_] value#))
+         (-value [_] value#)
+
+         IPositioned
+         (-pos [_] pos#))
 
        (defn ~lname? [v#]
          (instance? ~tname v#))
 
-       (defn ~lname [v#]
-         (~cname v#)))))
+       (defn ~lname
+         ([v#] (~cname v# nil))
+         ([v# pos#] (~cname v# pos#))))))
 
 (defltype LBoolean (if value "#t" "#f"))
 (defltype LNumber (pr-str value))
 (defltype LString (pr-str value))
-(defltype LSymbol value)
+(defltype LSymbol (str value))
 
 (defn atom? [value]
   (some #(% value) [lboolean? lnumber? lstring? lsymbol?]))
@@ -46,7 +51,7 @@
   (car [this])
   [cdr [this]])
 
-(deftype LCons [a d]
+(deftype LCons [a d pos]
   Object
   (toString [this]
     (if (cons-list? this)
@@ -60,6 +65,9 @@
   LType
   (-value [this] (seq this))
 
+  IPositioned
+  (-pos [this] pos)
+
   ConsCell
   (car [this] a)
   (cdr [this] d)
@@ -68,17 +76,25 @@
   (seq [this] (seq-cons-list this)))
 
 (defn lcons? [v] (instance? LCons v))
-(defn lcons [a d] (LCons. a d))
+(defn lcons
+  ([pos a d] (LCons. a d pos))
+  ([a d] (LCons. a d nil)))
 
 (defn cons-list? [cell]
   (or (nil? cell)
       (and (lcons? cell)
            (cons-list? (cdr cell)))))
 
-(defn cons-list [& l]
-  (if-not (seq l)
-    nil
-    (LCons. (first l) (apply cons-list (rest l)))))
+(defn llist
+  ([l pos]
+     (when (seq l)
+       (LCons. (first l) (llist (rest l) pos) pos)))
+  ([l] (llist l nil)))
+
+;; (defn cons-list [& l]
+;;   (if-not (seq l)
+;;     nil
+;;     (LCons. (first l) (apply cons-list (rest l)) nil)))
 
 (defn seq-cons-list [cell]
   (lazy-seq
@@ -99,13 +115,13 @@ into a BODOL data structure suitable for evaling."
    (seq? form)
    (if (and (= 3 (count form))
             (= '. (second form)))
-     (LCons. (clj->ltype (first form)) (clj->ltype (nth form 2)))
-     (apply cons-list (map clj->ltype form)))
+     (LCons. (clj->ltype (first form)) (clj->ltype (nth form 2)) nil)
+     (llist (map clj->ltype form)))
 
-   (number? form) (LNumber. form)
-   (string? form) (LString. form)
-   (or (true? form) (false? form)) (LBoolean. form)
-   (symbol? form) (LSymbol. (name form))
+   (number? form) (lnumber form)
+   (string? form) (lstring form)
+   (or (true? form) (false? form)) (lboolean form)
+   (symbol? form) (lsymbol (name form))
    :else (throw (ex-info (str "cljvalue " (pr-str form)
                               " has no corresponding type")
                          {:form form}))))

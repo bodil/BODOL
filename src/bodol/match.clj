@@ -82,10 +82,10 @@
                         (sequential? %) :seq
                         :else (type %)))
 (defmethod reconv :seq [v]
-  (apply t/cons-list (map reconv v)))
+  (t/llist (map reconv v)))
 (defmethod reconv :cons [v]
-  (LCons. (reconv (clojure.core.logic.protocols/lfirst v))
-          (reconv (clojure.core.logic.protocols/lnext v))))
+  (t/lcons (reconv (clojure.core.logic.protocols/lfirst v))
+           (reconv (clojure.core.logic.protocols/lnext v))))
 (defmethod reconv :default [v] v)
 
 (defn- real-lvar? [v]

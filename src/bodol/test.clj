@@ -5,4 +5,4 @@
             [bodol.parser :as parser]))
 
 (defn run []
-  (repl/eval (slurp "src/bodol/test.bodol")))
+  (repl/eval-file "src/bodol/test.bodol"))

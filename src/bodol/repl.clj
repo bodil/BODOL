@@ -6,15 +6,20 @@
             [bodol.monad :as m]
             [bodol.types :as t]))
 
+(defn eval-ast [scope ast]
+  (->> ast
+       (map eval/eval)
+       (m/reduce-state scope)
+       first
+       t/pr-value))
+
 (defn eval
-  ([scope string]
-     (->> (parser/parse string)
-          (map eval/eval)
-          (m/reduce-state scope)
-          first
-          t/pr-value))
-  ([string]
-     (eval (scope/scope) string)))
+  ([scope string] (eval-ast scope (parser/parse string)))
+  ([string] (eval (scope/scope) string)))
+
+(defn eval-file
+  ([scope filename] (eval-ast scope (parser/parse-file filename)))
+  ([filename] (eval-file (scope/scope) filename)))
 
 (defn eval-forms [forms]
   (-> (scope/scope)
