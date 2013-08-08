@@ -4,7 +4,8 @@
             [bodol.parser :as parser]
             [bodol.scope :as scope]
             [bodol.monad :as m]
-            [bodol.types :as t]))
+            [bodol.types :as t]
+            [bodol.error :as err]))
 
 (defn eval-ast [scope ast]
   (->> ast
@@ -47,12 +48,7 @@
                    (map eval/eval)
                    (m/reduce-state scope))
               (catch clojure.lang.ExceptionInfo e
-                (let [data (ex-data e)]
-                  [(str "Error: " (.getMessage e) "\n"
-                        (clojure.string/join
-                         "\n"
-                         (map (fn [[k v]] (str k ": " (t/pr-value v)))
-                              (dissoc data :scope))))
-                   scope])))]
-        (println (if (string? result) result (t/pr-value result)))
+                (print (err/report e))))]
+        (when-not (nil? result)
+          (println (if (string? result) result (t/pr-value result))))
         (recur scope)))))

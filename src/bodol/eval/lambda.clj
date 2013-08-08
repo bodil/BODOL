@@ -1,7 +1,8 @@
 (ns bodol.eval.lambda
   (:require [bodol.eval.core :as eval]
             [bodol.lambda :as l]
-            [bodol.types :as t])
+            [bodol.types :as t]
+            [bodol.error :as err])
   (:import [bodol.types LCons]
            [bodol.lambda Lambda]))
 
@@ -20,9 +21,9 @@
           call-arity (count args)]
       (cond
        (> call-arity arity)
-       (throw (ex-info (str "function of arity " arity " invoked with "
-                            call-arity " arguments " (t/pr-value args))
-                       {:args args :func func}))
+       (err/raise scope func :arity-mismatch
+                  (str "function of arity " arity " invoked with "
+                       call-arity " arguments " args))
 
        (< call-arity arity)
        [(l/curry func args) outer-scope]
@@ -36,11 +37,11 @@
                [result final-scope]
                ((eval/eval (:body clause)) scope)]
            [result outer-scope])
-         (throw (ex-info
-                 (str "function call did not match any defined patterns "
-                      "(" (t/pr-value func) " "
-                      (clojure.string/join " " (map t/pr-value args)) ")")
-                 {:args args :scope outer-scope :function func})))))))
+         (err/raise outer-scope func :pattern-match-failure
+                    (str "function call did not match any defined patterns "
+                         "(" (t/pr-value func) " "
+                         (clojure.string/join " " (map t/pr-value args))
+                         ")")))))))
 
 (extend-protocol eval/Eval
   Lambda
@@ -65,5 +66,5 @@
          (let [[result scope] ((invoke func args) scope)]
            [result scope])
 
-         :else (throw (ex-info (str "invoking non-function " func)
-                               {:value this :scope scope})))))))
+         :else (err/raise scope this :noncallable-invocation
+                          (str "invoking non-function " func)))))))

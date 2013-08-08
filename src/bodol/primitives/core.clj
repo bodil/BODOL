@@ -4,7 +4,8 @@
             [bodol.eval.lambda :as lambda]
             [bodol.types :refer [llist car cdr]]
             [bodol.types :as t]
-            [bodol.monad :as m]))
+            [bodol.monad :as m]
+            [bodol.error :as err]))
 
 (defn l-quote [[value]]
   (fn [scope]
@@ -15,15 +16,15 @@
     (let [[value scope] ((eval/eval value) scope)]
       (if (t/lsymbol? name)
         [value (assoc scope (t/-value name) value)]
-        (throw (ex-info "define called with non-symbol"
-                        {:args [name value] :scope scope}))))))
+        (err/raise scope name :non-symbol-define
+                   "define called with non-symbol")))))
 
 ;; TODO: get rid of cond, use pattern matching
 (defn l-cond [clauses]
   (if-not (zero? (rem (count clauses) 2))
-    (throw (ex-info (str "cond takes even number of clause pairs, "
-                         (count clauses) " given")
-                    {:args clauses}))
+    (err/raise nil (first clauses) :uneven-cond
+               (str "cond takes even number of clause pairs, "
+                    (count clauses) " given"))
 
     (let [clauses (partition 2 clauses)]
       (fn [scope]
@@ -41,8 +42,8 @@
   (fn [scope]
     (if-let [func (:function scope)]
       ((lambda/invoke func args) scope)
-      (throw (ex-info "recur called outside lambda"
-                      {:args args :scope scope})))))
+      (err/raise scope (first args) :recur-outside-lambda
+                 "recur called outside lambda"))))
 
 (defn l-asserts [[name & asserts]]
   (fn [scope]
@@ -53,18 +54,20 @@
         (let [form (first asserts)
               [result scope] ((eval/eval form) scope)]
           (when-not (= (t/lboolean true) result)
-            (throw (ex-info (str "Assert in " (t/-value name) " failed:\n"
-                                 "    " form
-                                 " -> " result "\n") {})))
+            (err/raise scope form :assert-failure
+                       (str "Assert in " (t/-value name) " failed:\n"
+                            "    " form
+                            " -> " result "\n")))
           (recur scope (rest asserts)))))))
 
 (defn l-assert [[name & body]]
   (fn [scope]
     (let [[result scope] (m/reduce-state scope (map eval/eval body))]
       (when-not (= (t/lboolean true) result)
-        (throw (ex-info (str "Assert in " (t/-value name) " failed:\n"
-                             "    " (last body)
-                             " -> " result "\n") {}))))
+        (err/raise scope (last body) :assert-failure
+                   (str "Assert in " (t/-value name) " failed:\n"
+                        "    " (last body)
+                        " -> " result "\n"))))
     [(t/lboolean true) scope]))
 
 
@@ -78,7 +81,9 @@
            (catch clojure.lang.ExceptionInfo e#
              (throw (ex-info (.getMessage e#)
                              (assoc (ex-data e#)
-                               {:args args# :scope scope#})))))))))
+                               {:sexp (first args#)
+                                :pos (t/-pos (first args#))
+                                :scope scope#})))))))))
 
 (defprim l-cons [item list]
   (if (t/cons-list? list)

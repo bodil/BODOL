@@ -2,7 +2,8 @@
   (:require [clojure.core.match :refer [match]]
             [clojure.string :as string]
             [bodol.types :as t]
-            [bodol.match :refer [find-match]]))
+            [bodol.match :refer [find-match]]
+            [bodol.error :as err]))
 
 (def ^:private alphabet "abcdefghijklmnopqrstuvwxyz")
 
@@ -55,19 +56,20 @@
 (defn lambda? [val]
   (instance? Lambda val))
 
-(defn- parse-def [clauses]
+(defn- parse-def [pos clauses]
   (let [cs (map (fn [[args body]] {:args args :body body}) clauses)]
     (cond
      (not= 1 (count (set (map (comp count :args) cs))))
-     (throw (ex-info (str "function declarations have different arities " clauses)
-                     {:args clauses}))
+     (err/sexpless-raise nil pos :declaration-arity-mismatch
+                         (str "function declarations have different arities "
+                              clauses))
 
      :else [cs ((comp count :args) (first cs))])))
 
 (defn lambda [pos & clauses]
-  (let [[clauses arity] (parse-def clauses)]
+  (let [[clauses arity] (parse-def pos clauses)]
     (Lambda. pos nil clauses arity nil [])))
 
 (defn defun [pos name & clauses]
-  (let [[clauses arity] (parse-def clauses)]
+  (let [[clauses arity] (parse-def pos clauses)]
     (Lambda. pos (t/-value name) clauses arity nil [])))
