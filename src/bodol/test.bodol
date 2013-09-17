@@ -99,21 +99,21 @@
 
 (assert recursion-with-recur
   (define fib (λ n → (cond
-                       (<= n 1) n
-                       #t (+ (recur (- n 1)) (recur (- n 2))))))
+                      (<= n 1) n
+                      #t (+ (recur (- n 1)) (recur (- n 2))))))
   (= 55 (fib 10)))
 
 (assert recursion-with-named-function
   (ƒ fib n → (cond
-               (<= n 1) n
-               #t (+ (fib (- n 1)) (fib (- n 2)))))
+              (<= n 1) n
+              #t (+ (fib (- n 1)) (fib (- n 2)))))
   (= 55 (fib 10)))
 
 (assert basic-pattern-matching
   (ƒ fib
-     0 → 0
-     1 → 1
-     n → (+ (fib (- n 1)) (fib (- n 2))))
+    0 → 0
+    1 → 1
+    n → (+ (fib (- n 1)) (fib (- n 2))))
   (= 55 (fib 10)))
 
 (ƒ foo
@@ -128,8 +128,8 @@
 
 (assert iterating-pattern-matching
   (ƒ map
-     f () → ()
-     f (head . tail) → (cons (f head) (map f tail)))
+    f () → ()
+    f (head . tail) → (cons (f head) (map f tail)))
   (= '(2 3 4) (map (λ a → (+ a 1)) '(1 2 3))))
 
 (ƒ equals
