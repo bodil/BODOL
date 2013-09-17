@@ -6,6 +6,6 @@
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [instaparse "1.2.2"]
                  [org.clojure/core.match "0.2.0-rc5"]
-                 [org.clojure/core.logic "0.8.3"]]
+                 [org.clojure/core.logic "0.8.4"]]
   :jvm-opts ["-Dfile.encoding=utf-8"]
   :main bodol.repl)
