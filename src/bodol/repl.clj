@@ -34,21 +34,25 @@
 (defn -main [& args]
   (println "BODOL version 0.0.0")
   (println "You are in a maze of twisty little passages, all alike.")
-  (loop [scope (scope/scope)]
-    (print "→→ ")
+  (loop [scope (scope/scope) input nil]
+    (print (if input "   " "→→ "))
     (flush)
-    (let [input (read-line)]
+    (let [input (str (or input "") (read-line))]
       (when-not input
         (println)
         (System/exit 0))
-      (let [[result scope]
-            (try
-              (->> input
-                   (parser/parse)
-                   (map eval/eval)
-                   (m/reduce-state scope))
-              (catch clojure.lang.ExceptionInfo e
-                (print (err/report e))))]
-        (when-not (nil? result)
-          (println (if (string? result) result (t/pr-value result))))
-        (recur scope)))))
+      (if (parser/incomplete? input)
+        (recur scope input)
+        (let [[result r-scope]
+              (try
+                (->> input
+                     (parser/parse)
+                     (map eval/eval)
+                     (m/reduce-state scope))
+                (catch clojure.lang.ExceptionInfo e
+                  (print (err/report e))))]
+          (if (nil? result)
+            (recur scope nil)
+            (do
+              (println (if (string? result) result (t/pr-value result)))
+              (recur r-scope nil))))))))

@@ -75,5 +75,11 @@ SYMBOL = #'[\\pL_$&/=+~:<>|§?*-][\\pL\\p{Digit}_$&/=+~.:<>|§?*-]*'
               parsed))))
   ([input] (parse input nil)))
 
+(defn incomplete? [input]
+  ;; Naive version, only looks for missing close-paren.
+  (let [p (insta/parse parser input)]
+    (and (insta/failure? p)
+         (some #(= % {:tag :string :expecting ")"}) (:reason p)))))
+
 (defn parse-file [filename]
   (parse (slurp filename) filename))
