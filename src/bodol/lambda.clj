@@ -15,6 +15,7 @@
   (-arity [this])
   (-scope [this])
   (-curried-args [this])
+  (-clauses [this])
   (curry [this args])
   (bind [this scope])
   (pattern-match [this args]))
@@ -48,7 +49,8 @@
   (-name [_] name)
   (-arity [_] arity)
   (-scope [_] scope)
-  (-curried-args [_] curried-args))
+  (-curried-args [_] curried-args)
+  (-clauses [_] clauses))
 
 (defmethod print-method Lambda [l ^java.io.Writer writer]
   (.write writer (.toString l)))

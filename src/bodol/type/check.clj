@@ -1,9 +1,11 @@
 (ns bodol.type.check
   (:require [bodol.types :as t]
+            [bodol.lambda :as l]
             [bodol.monad :as m]
             [bodol.parser :as parser]
             [clojure.string :as str])
-  (:import [bodol.types LCons LBoolean LNumber LString LSymbol]))
+  (:import [bodol.types LCons LBoolean LNumber LString LSymbol]
+           [bodol.lambda Lambda]))
 
 (defprotocol IState
   (fresh-var [this])
@@ -89,13 +91,20 @@
     (State. unified env (conj nongen t) lvars next))
 
   (unscope [_ other]
-    (State. (-unified other) env nongen lvars (-next other)))
+    (State. (-unified other) env nongen (-lvars other) (-next other)))
 
   (prune [this t]
-    (if (and (instance? Variable t)
-             (contains? unified t))
+    (cond
+     (and (instance? Variable t)
+          (generic? this t)
+          (lvars t))
+     (prune this (lvars t))
+
+     (and (instance? Variable t)
+          (contains? unified t))
       (prune this (unified t))
-      t))
+
+      :else t))
 
   (unify [this t1 t2]
     (let [t1 (prune this t1)
@@ -131,8 +140,8 @@
   Object
   (toString [_]
     (let [env (dissoc env "pair" "true" "cond" "zero" "pred" "times")]
-      (str "<State: " unified " :: " env " :: " nongen
-           " :: " lvars " :: " next ">"))))
+      (str unified " :: " env " :: " nongen
+           " :: " lvars " :: " next))))
 
 (defn occurs-in? [^State state ^Variable t l]
   (some #(occurs-in-type? state t %) l))
@@ -164,9 +173,18 @@
 
 (defn resolve [t state]
   (let [pruned (prune state t)]
-    (if (= pruned t)
-      t
-      pruned)))
+    (if (= pruned t) t pruned)))
+
+(defn bind-arg [arg]
+  (fn [^State state]
+    (let [[argtype state] (fresh-var state)
+          state (-> state
+                    (bind-env (t/-value arg) argtype)
+                    (set-nongen argtype))]
+      [argtype state])))
+
+(defn bind-args [state args]
+  (m/map-state state (map bind-arg args)))
 
 
 
@@ -210,12 +228,21 @@
                     [resulttype state] (fresh-var state)
                     state (unify state (function argtype resulttype) functype)]
                 (recur (t/cdr args) state resulttype))
-              [functype state])))))))
+              [functype state]))))))
+
+  Lambda
+  (analyse [this]
+    (fn [^State state]
+      (let [{:keys [args body]} (first (l/-clauses this))
+            [argtypes new-state] (bind-args state args)
+            [resulttype new-state] ((analyse body) new-state)]
+        [(apply function (concat argtypes (list resulttype)))
+         (unscope state new-state)]))))
 
 
 
 (defn fresh-state []
-  (let [state (State. {} {} #{} {} \α)
+  (let [state (State. {} {} #{} {} \a)
         [var1 state] (fresh-var state)
         [var2 state] (fresh-var state)
         [var3 state] (fresh-var state)
@@ -223,11 +250,21 @@
     (-> state
         (bind-env "+" (function Num Num Num)))))
 
+(defn- check-sexp-m [sexp]
+  (fn [^State state]
+    ((analyse sexp) state)))
+
+(defn type-check
+  ([prog state]
+     (m/map-state state (map check-sexp-m prog)))
+  ([prog] (type-check prog (fresh-state))))
+
+(defn print-result [[types state]]
+  (doseq [type types]
+    (println (to-string type state))))
 
 
 
-
-(let [prog (parser/parse "(+ 2 3)")
-      state (fresh-state)
-      [type state] ((analyse (first prog)) state)]
-  (to-string type state))
+#_(-> (parser/parse "(ƒ double-add m n → (+ (+ m m) (+ n n)))")
+      type-check
+      print-result)
