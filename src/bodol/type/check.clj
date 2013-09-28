@@ -45,8 +45,17 @@
                              " " (to-string (second args) state) ")")
      :else (str name " " (str/join " " (map #(to-string % state) args))))))
 
-(defn function [from to]
-  (Oper. "→" [from to]))
+
+
+(def Num (Oper. "Num" []))
+(def Str (Oper. "Str" []))
+(def Bool (Oper. "Bool" []))
+(def Sym (Oper. "Sym" []))
+
+(defn function [& args]
+  (if (<= (count args) 2)
+    (Oper. "→" (vec args))
+    (Oper. "→" [(first args) (apply function (rest args))])))
 
 
 
@@ -161,13 +170,6 @@
 
 
 
-(def Num (Oper. "Num" []))
-(def Str (Oper. "Str" []))
-(def Bool (Oper. "Bool" []))
-(def Sym (Oper. "Sym" []))
-
-
-
 (extend-protocol SyntaxNode
   LNumber
   (analyse [this]
@@ -219,7 +221,7 @@
         [var3 state] (fresh-var state)
         pairtype (Oper. "×" [var1 var2])]
     (-> state
-        (bind-env "+" (function Num (function Num Num))))))
+        (bind-env "+" (function Num Num Num)))))
 
 
 
