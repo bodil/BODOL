@@ -5,7 +5,8 @@
             [bodol.types :refer [llist car cdr]]
             [bodol.types :as t]
             [bodol.monad :as m]
-            [bodol.error :as err]))
+            [bodol.error :as err]
+            [bodol.type.vars :as v :refer [Num Str Bool Sym function pair]]))
 
 (defn l-quote [[value]]
   (fn [scope]
@@ -72,26 +73,26 @@
 
 
 
-(defmacro defprim [name bindings & body]
-  `(defn ~name [args#]
-     (fn [scope#]
-       (let [[~bindings scope#] (eval/map-eval scope# args#)]
-         (try
-           [(do ~@body) scope#]
-           (catch clojure.lang.ExceptionInfo e#
-             (throw (ex-info (.getMessage e#)
-                             (assoc (ex-data e#)
-                               {:sexp (first args#)
-                                :pos (t/-pos (first args#))
-                                :scope scope#})))))))))
+(defmacro defprim [sig name bindings & body]
+  `(def ~name
+     (with-meta
+       (fn ~name [args#]
+         (fn [scope#]
+           (let [[~bindings scope#] (eval/map-eval scope# args#)]
+             (try
+               [(do ~@body) scope#]
+               (catch clojure.lang.ExceptionInfo e#
+                 (throw (ex-info (.getMessage e#)
+                                 (assoc (ex-data e#)
+                                   {:sexp (first args#)
+                                    :pos (t/-pos (first args#))
+                                    :scope scope#}))))))))
+       {:signature ~sig})))
 
-(defprim l-cons [item list]
+(defprim (function :a (v/list :a)) l-cons [item list]
   (if (t/cons-list? list)
     (t/lcons item list)
     (throw (ex-info "cons called with non-list" {}))))
-
-(defprim l-list values
-  (llist values))
 
 
 
@@ -102,5 +103,4 @@
    "cond" l-cond
    "asserts" l-asserts
    "assert" l-assert
-   "cons" l-cons
-   "list" l-list})
+   "cons" l-cons})

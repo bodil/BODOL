@@ -3,9 +3,11 @@
             [bodol.lambda :as l]
             [bodol.monad :as m]
             [bodol.parser :as parser]
+            [bodol.type.vars :as v :refer [function Num Str Bool Sym]]
             [clojure.string :as str])
   (:import [bodol.types LCons LBoolean LNumber LString LSymbol]
-           [bodol.lambda Lambda]))
+           [bodol.lambda Lambda]
+           [bodol.type.vars Variable Oper]))
 
 (defprotocol IState
   (fresh-var [this])
@@ -30,36 +32,28 @@
 (defprotocol TypeValue
   (to-string [this state]))
 
-(defrecord Variable [id]
+(extend-type Variable
   TypeValue
   (to-string [this state]
     (let [pruned (prune state this)]
       (if (= pruned this)
-        id
+        (:id this)
         (to-string pruned state)))))
 
-(defrecord Oper [name args]
+(extend-type Oper
   TypeValue
-  (to-string [_ state]
-    (cond
-     (zero? (count args)) name
-     (= 2 (count args)) (str "(" (to-string (first args) state) " " name
-                             " " (to-string (second args) state) ")")
-     :else (str name " " (str/join " " (map #(to-string % state) args))))))
+  (to-string [this state]
+    (let [args (:args this)
+          name (:name this)]
+      (cond
+       (zero? (count args))
+       name
 
+       (= 2 (count args))
+       (str "(" (to-string (first args) state) " " name
+            " " (to-string (second args) state) ")")
 
-
-(def Num (Oper. "Num" []))
-(def Str (Oper. "Str" []))
-(def Bool (Oper. "Bool" []))
-(def Sym (Oper. "Sym" []))
-
-(defn function [& args]
-  (if (<= (count args) 2)
-    (Oper. "→" (vec args))
-    (Oper. "→" [(first args) (apply function (rest args))])))
-
-
+       :else (str (str/join " " (map #(to-string % state) args)) " " name)))))
 
 (declare occurs-in? occurs-in-type?)
 
@@ -82,7 +76,8 @@
     (not (occurs-in? this nongen t)))
 
   (lookup-env [_ name]
-    (env name))
+    (when-let [val (env name)]
+      (if-let [m (:signature (meta val))] m val)))
 
   (bind-env [_ name value]
     (State. unified (assoc env name value) nongen lvars next))
@@ -211,7 +206,7 @@
             sym (lookup-env state name)]
         (if sym
           ((fresh sym) state)
-          (throw (Error. (str "Undefined symbol " name " ::: " state)))))))
+          (throw (Error. (str "Undefined symbol " name)))))))
 
   LCons
   (analyse [this]
@@ -241,14 +236,8 @@
 
 
 
-(defn fresh-state []
-  (let [state (State. {} {} #{} {} \a)
-        [var1 state] (fresh-var state)
-        [var2 state] (fresh-var state)
-        [var3 state] (fresh-var state)
-        pairtype (Oper. "×" [var1 var2])]
-    (-> state
-        (bind-env "+" (function Num Num Num)))))
+(defn fresh-state [scope]
+  (State. {} scope #{} {} \a))
 
 (defn- check-sexp-m [sexp]
   (fn [^State state]
@@ -256,8 +245,7 @@
 
 (defn type-check
   ([prog state]
-     (m/map-state state (map check-sexp-m prog)))
-  ([prog] (type-check prog (fresh-state))))
+     (m/map-state state (map check-sexp-m prog))))
 
 (defn print-result [[types state]]
   (doseq [type types]
@@ -266,5 +254,5 @@
 
 
 #_(-> (parser/parse "(ƒ double-add m n → (+ (+ m m) (+ n n)))")
-      type-check
+      (type-check (fresh-state (bodol.scope/scope)))
       print-result)

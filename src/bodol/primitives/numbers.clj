@@ -1,28 +1,29 @@
 (ns bodol.primitives.numbers
   (:require [bodol.eval :as eval]
             [bodol.types :as t]
-            [bodol.primitives.core :refer [defprim]]))
+            [bodol.primitives.core :refer [defprim]]
+            [bodol.type.vars :refer [Num Str Bool Sym function pair]]))
 
-(defmacro defnumf [name args & body]
-  `(defprim ~name ~args
+(defmacro defnumf [sig name args & body]
+  `(defprim ~sig ~name ~args
      (let ~(apply vector (interleave args (map (fn [x#] `(t/-value ~x#)) args)))
        (t/lnumber (do ~@body)))))
 
-(defmacro defboolf [name args & body]
-  `(defprim ~name ~args
+(defmacro defboolf [sig name args & body]
+  `(defprim ~sig ~name ~args
      (let ~(apply vector (interleave args (map (fn [x#] `(t/-value ~x#)) args)))
        (t/lboolean (do ~@body)))))
 
-(defnumf plus [n1 n2] (+ n1 n2))
-(defnumf minus [n1 n2] (- n1 n2))
-(defnumf multiply [n1 n2] (* n1 n2))
-(defnumf divide [n1 n2] (/ n1 n2))
-(defnumf remainder [n1 n2] (rem n1 n2))
+(defnumf (function Num Num Num) plus [n1 n2] (+ n1 n2))
+(defnumf (function Num Num Num) minus [n1 n2] (- n1 n2))
+(defnumf (function Num Num Num) multiply [n1 n2] (* n1 n2))
+(defnumf (function Num Num Num) divide [n1 n2] (/ n1 n2))
+(defnumf (function Num Num Num) remainder [n1 n2] (rem n1 n2))
 
-(defboolf less-than [n1 n2] (< n1 n2))
-(defboolf greater-than [n1 n2] (> n1 n2))
-(defboolf less-than-or-equal [n1 n2] (<= n1 n2))
-(defboolf greater-than-or-equal [n1 n2] (>= n1 n2))
+(defboolf (function Num Num Bool) less-than [n1 n2] (< n1 n2))
+(defboolf (function Num Num Bool) greater-than [n1 n2] (> n1 n2))
+(defboolf (function Num Num Bool) less-than-or-equal [n1 n2] (<= n1 n2))
+(defboolf (function Num Num Bool) greater-than-or-equal [n1 n2] (>= n1 n2))
 
 (def primitives
   {"+" plus
