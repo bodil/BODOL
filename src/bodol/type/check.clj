@@ -9,28 +9,43 @@
            [bodol.lambda Lambda]
            [bodol.type.vars Variable Oper]))
 
-(defprotocol IState
-  (fresh-var [this])
-  (fresh-lvar [this t])
-  (generic? [this t])
-  (lookup-env [this name])
-  (bind-env [this name value])
-  (set-nongen [this t])
-  (bind-lvar [this t lvar])
-  (unscope [this other])
-  (prune [this t])
-  (unify [this t1 t2])
-  (-unified [this])
-  (-env [this])
-  (-nongen [this])
-  (-lvars [this])
-  (-next [this]))
-
 (defprotocol SyntaxNode
   (analyse [this]))
 
 (defprotocol TypeValue
   (to-string [this state]))
+
+
+
+(declare occurs-in-type? prune)
+
+(defn occurs-in? [state ^Variable t l]
+  (some #(occurs-in-type? state t %) l))
+
+(defn occurs-in-type? [state ^Variable v type2]
+  (let [v (prune state v)]
+    (cond
+     (= v type2) true
+     (instance? Oper type2) (occurs-in? state v (:args type2))
+     :else false)))
+
+(defn generic? [state t]
+  (not (occurs-in? state (:nongen state) t)))
+
+(defn prune [state t]
+  (cond
+   (and (instance? Variable t)
+        (generic? state t)
+        ((:lvars state) t))
+   (prune state ((:lvars state) t))
+
+   (and (instance? Variable t)
+        (contains? (:unified state) t))
+   (prune state ((:unified state) t))
+
+   :else t))
+
+
 
 (extend-type Variable
   TypeValue
@@ -55,101 +70,67 @@
 
        :else (str (str/join " " (map #(to-string % state) args)) " " name)))))
 
-(declare occurs-in? occurs-in-type?)
 
-(deftype State [unified env nongen lvars next]
-  IState
-  (fresh-var [_]
-    (let [inced (-> next int inc char)]
-      [(Variable. (str next)) (State. unified env nongen lvars inced)]))
 
-  (fresh-lvar [this t]
-    (if-let [lvar (lvars t)]
-      [lvar this]
-      (let [[lvar state] (fresh-var this)]
-        [lvar (bind-lvar state t lvar)])))
+(defn fresh-var [state]
+  (assoc state :next (-> (:next state) int inc char)))
 
-  (bind-lvar [this t lvar]
-    (State. unified env nongen (assoc lvars t lvar) next))
+(defn bind-lvar [state t lvar]
+  (assoc-in state [:lvars t] lvar))
 
-  (generic? [this t]
-    (not (occurs-in? this nongen t)))
+(defn fresh-lvar [state t]
+  (if-let [lvar ((:lvars state) t)]
+    [lvar state]
+    (let [[lvar state] (fresh-var state)]
+      [lvar (bind-lvar state t lvar)])))
 
-  (lookup-env [_ name]
-    (when-let [val (env name)]
-      (if-let [m (:signature (meta val))] m val)))
+(defn fresh-var [state]
+  (let [next (:next state)
+        inced (-> next int inc char)]
+    [(Variable. (str next)) (assoc state :next inced)]))
 
-  (bind-env [_ name value]
-    (State. unified (assoc env name value) nongen lvars next))
+(defn lookup-env [state name]
+  (when-let [val ((:env state) name)]
+    (if-let [m (:signature (meta val))] m val)))
 
-  (set-nongen [_ t]
-    (State. unified env (conj nongen t) lvars next))
+(defn bind-env [state name value]
+  (assoc-in state [:env name] value))
 
-  (unscope [_ other]
-    (State. (-unified other) env nongen (-lvars other) (-next other)))
+(defn set-nongen [state t]
+  (assoc state :nongen (conj (:nongen state) t)))
 
-  (prune [this t]
+(defn unscope [state other]
+  (assoc other
+    :env (:env state)
+    :nongen (:nongen state)))
+
+(defn unify [state t1 t2]
+  (let [t1 (prune state t1)
+        t2 (prune state t2)]
     (cond
-     (and (instance? Variable t)
-          (generic? this t)
-          (lvars t))
-     (prune this (lvars t))
 
-     (and (instance? Variable t)
-          (contains? unified t))
-      (prune this (unified t))
-
-      :else t))
-
-  (unify [this t1 t2]
-    (let [t1 (prune this t1)
-          t2 (prune this t2)]
-      (cond
-
-       (and (instance? Variable t1) (not= t1 t2))
-       (if (occurs-in-type? this t1 t2)
-         (throw (Error. (str "recursive unification between " t1 " and " t2)))
-         (State. (assoc unified t1 t2) env nongen lvars next))
+     (and (instance? Variable t1) (not= t1 t2))
+     (if (occurs-in-type? state t1 t2)
+       (throw (Error. (str "recursive unification between " t1 " and " t2)))
+       (assoc state :unified (assoc (:unified state) t1 t2)))
 
        (and (instance? Oper t1) (instance? Variable t2))
-       (unify this t2 t1)
+       (unify state t2 t1)
 
        (and (instance? Oper t1) (instance? Oper t2))
        (if (or (not= (:name t1) (:name t2))
                (not= (count (:args t1)) (count (:args t2))))
-         (throw (Error. (str "Type mismatch: " (to-string t1 this)
-                             " ≠ " (to-string t2 this))))
-         (loop [state this a (:args t1) b (:args t2)]
+         (throw (Error. (str "Type mismatch: " (to-string t1 state)
+                             " ≠ " (to-string t2 state))))
+         (loop [state state a (:args t1) b (:args t2)]
            (if (and (seq a) (seq b))
              (recur (unify state (first a) (first b)) (rest a) (rest b))
              state)))
 
        :else (throw (Error. (str "Cannot unify args " t1 " and " t2))))))
 
-  (-unified [_] unified)
-  (-env [_] env)
-  (-nongen [_] nongen)
-  (-lvars [_] lvars)
-  (-next [_] next)
-
-  Object
-  (toString [_]
-    (let [env (dissoc env "pair" "true" "cond" "zero" "pred" "times")]
-      (str unified " :: " env " :: " nongen
-           " :: " lvars " :: " next))))
-
-(defn occurs-in? [^State state ^Variable t l]
-  (some #(occurs-in-type? state t %) l))
-
-(defn occurs-in-type? [^State state ^Variable v type2]
-  (let [v (prune state v)]
-    (cond
-     (= v type2) true
-     (instance? Oper type2) (occurs-in? state v (:args type2))
-     :else false)))
-
 (defn fresh [t]
-  (fn [^State state]
+  (fn [state]
     (let [t (prune state t)]
       (cond
        (instance? Variable t)
@@ -171,7 +152,7 @@
     (if (= pruned t) t pruned)))
 
 (defn bind-arg [arg]
-  (fn [^State state]
+  (fn [state]
     (let [[argtype state] (fresh-var state)
           state (-> state
                     (bind-env (t/-value arg) argtype)
@@ -186,22 +167,22 @@
 (extend-protocol SyntaxNode
   LNumber
   (analyse [this]
-    (fn [^State state]
+    (fn [state]
       [Num state]))
 
   LString
   (analyse [this]
-    (fn [^State state]
+    (fn [state]
       [Str state]))
 
   LBoolean
   (analyse [this]
-    (fn [^State state]
+    (fn [state]
       [Bool state]))
 
   LSymbol
   (analyse [this]
-    (fn [^State state]
+    (fn [state]
       (let [name (t/-value this)
             sym (lookup-env state name)]
         (if sym
@@ -213,7 +194,7 @@
     (let [func (t/car this)
           args (t/cdr this)]
 
-      (fn [^State state]
+      (fn [state]
         (let [[functype state] ((analyse func) state)]
           (loop [args args
                  state state
@@ -227,7 +208,7 @@
 
   Lambda
   (analyse [this]
-    (fn [^State state]
+    (fn [state]
       (let [{:keys [args body]} (first (l/-clauses this))
             [argtypes new-state] (bind-args state args)
             [resulttype new-state] ((analyse body) new-state)]
@@ -237,10 +218,10 @@
 
 
 (defn fresh-state [scope]
-  (State. {} scope #{} {} \a))
+  {:unified {} :env scope :nongen #{} :lvars {} :next \a})
 
 (defn- check-sexp-m [sexp]
-  (fn [^State state]
+  (fn [state]
     ((analyse sexp) state)))
 
 (defn type-check
