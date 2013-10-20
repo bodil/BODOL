@@ -1,4 +1,5 @@
-(ns bodol.type.vars)
+(ns bodol.type.vars
+  (:refer-clojure :exclude [list]))
 
 (defrecord Variable [id])
 
