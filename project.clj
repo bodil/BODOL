@@ -8,4 +8,7 @@
                  [org.clojure/core.match "0.2.0-rc5"]
                  [org.clojure/core.logic "0.8.4"]]
   :jvm-opts ["-Dfile.encoding=utf-8"]
-  :main bodol.repl)
+  :main bodol.repl
+  :profiles
+  {:uberjar {:aot :all
+             :main bodol.repl.REPL}})

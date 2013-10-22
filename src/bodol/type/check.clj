@@ -1,4 +1,5 @@
 (ns bodol.type.check
+  (:refer-clojure :exclude [resolve])
   (:require [bodol.types :as t]
             [bodol.lambda :as l]
             [bodol.monad :as m]

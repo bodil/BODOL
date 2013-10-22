@@ -5,7 +5,8 @@
             [bodol.scope :as scope]
             [bodol.monad :as m]
             [bodol.types :as t]
-            [bodol.error :as err]))
+            [bodol.error :as err])
+  (:gen-class :name bodol.repl.REPL :main true))
 
 (defn eval-ast [scope ast]
   (->> ast
