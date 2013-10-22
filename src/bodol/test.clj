@@ -7,6 +7,6 @@
 
 (defn run []
   (try
-    (repl/eval-file "src/bodol/test.bodol")
+    (repl/eval-file (clojure.java.io/resource "BODOL/test.bodol"))
     (catch clojure.lang.ExceptionInfo e
       (err/report e))))

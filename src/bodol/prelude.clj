@@ -2,4 +2,4 @@
   (:require [bodol.parser :refer [parse]]))
 
 (def prelude
-  (parse (slurp "src/bodol/prelude.bodol")))
+  (parse (slurp (clojure.java.io/resource "BODOL/prelude.bodol"))))

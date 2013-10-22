@@ -92,7 +92,7 @@
   (= foo "foobar"))
 
 (assert currying
-  (ƒ triplet a b c → (list a b c))
+  (ƒ triplet a b c → (cons a (cons b (cons c ()))))
   (define one-and (triplet 1))
   (define one-and-two-and (one-and 2))
   (= '(1 2 3) (one-and-two-and 3)))
@@ -119,7 +119,7 @@
 (ƒ foo
   (0 a) → a
   (a 0) → a
-  (a b) → (list a b))
+  (a b) → (cons a (cons b ())))
 
 (asserts nested-pattern-matching
   (= 5 (foo '(0 5)))
