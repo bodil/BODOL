@@ -235,6 +235,23 @@
 
 
 
-#_(-> (parser/parse "(ƒ double-add m n → (+ (+ m m) (+ n n)))")
+
+#_(-> (parser/parse "1337")
+      (type-check (fresh-state (bodol.scope/scope)))
+      print-result)
+
+#_(-> (parser/parse "rainbow-dash")
+      (type-check (fresh-state (bodol.scope/scope)))
+      print-result)
+
+#_(-> (parser/parse "(ƒ add a b → (+ a b))")
+      (type-check (fresh-state (bodol.scope/scope)))
+      print-result)
+
+#_(-> (parser/parse "(ƒ double-mult a b → (* (+ a a) (+ b b)))")
+      (type-check (fresh-state (bodol.scope/scope)))
+      print-result)
+
+#_(-> (parser/parse "(ƒ eq a a → #t a b → #f)")
       (type-check (fresh-state (bodol.scope/scope)))
       print-result)
