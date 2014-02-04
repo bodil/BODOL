@@ -1,41 +1,37 @@
+{-# LANGUAGE GADTs #-}
+
 module BODOL.Types where
+
+class (Show t, Eq t) => LType t
 
 --- Datatype for all runtime types
 
-data LCons = LCons LType LType
-instance Show LCons where show (LCons a d) = "(" ++ show a ++ " . " ++ show d ++ ")"
+data LCons a b where
+  LCons :: (LType a, LType d) => a -> d -> LCons a d
+instance LType (LCons a d)
+instance Eq (LCons a d) where (==) (LCons a1 d1) (LCons a2 d2) = (a1 == a2) && (d1 == d2)
+instance Show (LCons a d) where show (LCons a d) = "(" ++ show a ++ " . " ++ show d ++ ")"
 
-data LSymbol = LSymbol String
-instance Show LSymbol where show (LSymbol sym) = sym
+data LSymbol = LSymbol String deriving (Eq, Show)
+instance LType LSymbol
 
-data LString = LString String
+data LString = LString String deriving (Eq)
+instance LType LString
 instance Show LString where show (LString str) = "\"" ++ str ++ "\""
 
-data LNumber = LNumber String -- TODO obviously not a string, insert numeric tower pls
-instance Show LNumber where show (LNumber num) = num
+data LNumber = LNumber String deriving (Eq, Show) -- TODO obviously not a string, insert numeric tower pls
+instance LType LNumber
 
-data LBoolean = LBoolean Bool
-instance Show LBoolean where show (LBoolean True) = "#t"
-                             show (LBoolean False) = "#f"
+data LBool = LBool Bool deriving (Eq)
+instance LType LBool
+instance Show LBool where show (LBool True) = "#t"
+                          show (LBool False) = "#f"
 
-data LType = LTCons LCons -- nonono this is horrid, make it a typeclass maybe
-           | LTSymbol LSymbol
-           | LTString LString
-           | LTNumber LNumber
-           | LTBoolean LBoolean
-
-instance Show LType where
-  show (LTCons val) = show val
-  show (LTSymbol val) = show val
-  show (LTString val) = show val
-  show (LTNumber val) = show val
-  show (LTBoolean val) = show val
-
-car :: LCons -> LType
+car :: (LType a, LType b) => LCons a b -> a
 car (LCons a _) = a
 
-cdr :: LCons -> LType
+cdr :: (LType a, LType b) => LCons a b -> b
 cdr (LCons _ d) = d
 
-cons :: LType -> LType -> LCons
+cons :: (LType a, LType b) => a -> b -> LCons a b
 cons = LCons
