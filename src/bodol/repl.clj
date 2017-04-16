@@ -33,8 +33,8 @@
      (t/pr-value value#)))
 
 (defn -main [& args]
-  (println "BODOL version 0.0.1")
-  (println "Mike, You are in a maze of twisty little passages, all alike.")
+  (println "BODOL version 0.0.2")
+  (println   "Hey" (System/getProperty "user.name") ", You are in a maze of twisty little passages, all alike.")
   (loop [scope (scope/scope) input nil]
     (print (if input "   " "→→ "))
     (flush)
