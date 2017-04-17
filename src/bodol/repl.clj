@@ -41,7 +41,8 @@
     (let [input (str (or input "") (read-line))]
       (when-not input
         (println)
-        (System/exit 0))
+        (System/exit 0)
+        (println))
       (if (parser/incomplete? input)
         (recur scope input)
         (let [[result r-scope]
