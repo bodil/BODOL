@@ -33,15 +33,16 @@
      (t/pr-value value#)))
 
 (defn -main [& args]
-  (println "BODOL version 0.0.0")
-  (println "You are in a maze of twisty little passages, all alike.")
+  (println "BODOL version 0.0.2")
+  (println   "Hey" (System/getProperty "user.name") ", You are in a maze of twisty little passages, all alike.")
   (loop [scope (scope/scope) input nil]
     (print (if input "   " "→→ "))
     (flush)
     (let [input (str (or input "") (read-line))]
       (when-not input
         (println)
-        (System/exit 0))
+        (System/exit 0)
+        (println))
       (if (parser/incomplete? input)
         (recur scope input)
         (let [[result r-scope]
